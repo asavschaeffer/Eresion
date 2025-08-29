@@ -1,0 +1,726 @@
+emergent-system/
+│
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   ├── cd-staging.yml
+│   │   ├── cd-production.yml
+│   │   ├── nightly-tests.yml
+│   │   ├── performance-benchmarks.yml
+│   │   └── security-audit.yml
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   ├── ability_issue.md
+│   │   ├── pattern_detection_issue.md
+│   │   └── performance_issue.md
+│   └── CODEOWNERS
+│
+├── src/
+│   ├── core/
+│   │   ├── tokenization/
+│   │   │   ├── base/
+│   │   │   │   ├── token.h
+│   │   │   │   ├── token.cpp
+│   │   │   │   ├── token_buffer.h
+│   │   │   │   ├── token_buffer.cpp
+│   │   │   │   ├── token_factory.h
+│   │   │   │   └── token_factory.cpp
+│   │   │   ├── tokenizers/
+│   │   │   │   ├── event_tokenizer.h
+│   │   │   │   ├── event_tokenizer.cpp
+│   │   │   │   ├── stream_tokenizer.h
+│   │   │   │   ├── stream_tokenizer.cpp
+│   │   │   │   ├── biometric_tokenizer.h
+│   │   │   │   ├── biometric_tokenizer.cpp
+│   │   │   │   ├── composite_tokenizer.h
+│   │   │   │   ├── composite_tokenizer.cpp
+│   │   │   │   ├── moment_tokenizer.h
+│   │   │   │   └── moment_tokenizer.cpp
+│   │   │   ├── enrichment/
+│   │   │   │   ├── semantic_enricher.h
+│   │   │   │   ├── semantic_enricher.cpp
+│   │   │   │   ├── context_enricher.h
+│   │   │   │   ├── context_enricher.cpp
+│   │   │   │   ├── musical_enricher.h
+│   │   │   │   ├── musical_enricher.cpp
+│   │   │   │   ├── behavioral_enricher.h
+│   │   │   │   └── behavioral_enricher.cpp
+│   │   │   ├── filters/
+│   │   │   │   ├── privacy_filter.h
+│   │   │   │   ├── privacy_filter.cpp
+│   │   │   │   ├── noise_filter.h
+│   │   │   │   ├── noise_filter.cpp
+│   │   │   │   ├── redundancy_filter.h
+│   │   │   │   └── redundancy_filter.cpp
+│   │   │   └── interfaces/
+│   │   │       ├── itokenizer.h
+│   │   │       ├── ienricher.h
+│   │   │       └── ifilter.h
+│   │   │
+│   │   ├── temporal_graph/
+│   │   │   ├── graph/
+│   │   │   │   ├── temporal_graph.h
+│   │   │   │   ├── temporal_graph.cpp
+│   │   │   │   ├── graph_node.h
+│   │   │   │   ├── graph_node.cpp
+│   │   │   │   ├── graph_edge.h
+│   │   │   │   ├── graph_edge.cpp
+│   │   │   │   ├── multi_scale_edge.h
+│   │   │   │   └── multi_scale_edge.cpp
+│   │   │   ├── operations/
+│   │   │   │   ├── cooccurrence_tracker.h
+│   │   │   │   ├── cooccurrence_tracker.cpp
+│   │   │   │   ├── succession_tracker.h
+│   │   │   │   ├── succession_tracker.cpp
+│   │   │   │   ├── graph_pruner.h
+│   │   │   │   ├── graph_pruner.cpp
+│   │   │   │   ├── graph_merger.h
+│   │   │   │   └── graph_merger.cpp
+│   │   │   ├── persistence/
+│   │   │   │   ├── graph_serializer.h
+│   │   │   │   ├── graph_serializer.cpp
+│   │   │   │   ├── core_graph_manager.h
+│   │   │   │   ├── core_graph_manager.cpp
+│   │   │   │   ├── volatile_graph_manager.h
+│   │   │   │   └── volatile_graph_manager.cpp
+│   │   │   ├── analysis/
+│   │   │   │   ├── graph_metrics.h
+│   │   │   │   ├── graph_metrics.cpp
+│   │   │   │   ├── centrality_calculator.h
+│   │   │   │   ├── centrality_calculator.cpp
+│   │   │   │   ├── community_detector.h
+│   │   │   │   └── community_detector.cpp
+│   │   │   └── interfaces/
+│   │   │       ├── igraph.h
+│   │   │       ├── igraph_operation.h
+│   │   │       └── igraph_analyzer.h
+│   │   │
+│   │   ├── pattern_detection/
+│   │   │   ├── detectors/
+│   │   │   │   ├── motif_detector.h
+│   │   │   │   ├── motif_detector.cpp
+│   │   │   │   ├── sequence_detector.h
+│   │   │   │   ├── sequence_detector.cpp
+│   │   │   │   ├── rhythm_detector.h
+│   │   │   │   ├── rhythm_detector.cpp
+│   │   │   │   ├── loop_detector.h
+│   │   │   │   ├── loop_detector.cpp
+│   │   │   │   ├── hub_detector.h
+│   │   │   │   ├── hub_detector.cpp
+│   │   │   │   ├── cascade_detector.h
+│   │   │   │   ├── cascade_detector.cpp
+│   │   │   │   ├── phase_detector.h
+│   │   │   │   └── phase_detector.cpp
+│   │   │   ├── algorithms/
+│   │   │   │   ├── gspan.h
+│   │   │   │   ├── gspan.cpp
+│   │   │   │   ├── prefixspan.h
+│   │   │   │   ├── prefixspan.cpp
+│   │   │   │   ├── leiden.h
+│   │   │   │   ├── leiden.cpp
+│   │   │   │   ├── louvain.h
+│   │   │   │   ├── louvain.cpp
+│   │   │   │   ├── tarjan_scc.h
+│   │   │   │   ├── tarjan_scc.cpp
+ялялял│   │   │   │   ├── fft_rhythm.h
+│   │   │   │   └── fft_rhythm.cpp
+│   │   │   ├── patterns/
+│   │   │   │   ├── pattern.h
+│   │   │   │   ├── pattern.cpp
+│   │   │   │   ├── behavioral_motif.h
+│   │   │   │   ├── behavioral_motif.cpp
+│   │   │   │   ├── pattern_cluster.h
+│   │   │   │   ├── pattern_cluster.cpp
+│   │   │   │   ├── pattern_stability.h
+│   │   │   │   └── pattern_stability.cpp
+│   │   │   └── interfaces/
+│   │   │       ├── idetector.h
+│   │   │       ├── ipattern.h
+│   │   │       └── ialgorithm.h
+│   │   │
+│   │   ├── dual_processing/
+│   │   │   ├── fast_thinking/
+│   │   │   │   ├── fast_thinking_engine.h
+│   │   │   │   ├── fast_thinking_engine.cpp
+│   │   │   │   ├── sliding_window.h
+│   │   │   │   ├── sliding_window.cpp
+│   │   │   │   ├── pattern_matcher.h
+│   │   │   │   ├── pattern_matcher.cpp
+│   │   │   │   ├── prediction_engine.h
+│   │   │   │   ├── prediction_engine.cpp
+│   │   │   │   ├── markov_chain.h
+│   │   │   │   ├── markov_chain.cpp
+│   │   │   │   ├── template_cache.h
+│   │   │   │   └── template_cache.cpp
+│   │   │   ├── slow_thinking/
+│   │   │   │   ├── slow_thinking_engine.h
+│   │   │   │   ├── slow_thinking_engine.cpp
+│   │   │   │   ├── pattern_miner.h
+│   │   │   │   ├── pattern_miner.cpp
+│   │   │   │   ├── deep_analyzer.h
+│   │   │   │   ├── deep_analyzer.cpp
+│   │   │   │   ├── evolution_tracker.h
+│   │   │   │   ├── evolution_tracker.cpp
+│   │   │   │   ├── stability_analyzer.h
+│   │   │   │   └── stability_analyzer.cpp
+│   │   │   ├── communication/
+│   │   │   │   ├── message_queue.h
+│   │   │   │   ├── message_queue.cpp
+│   │   │   │   ├── sync_protocol.h
+│   │   │   │   ├── sync_protocol.cpp
+│   │   │   │   ├── shared_state.h
+│   │   │   │   └── shared_state.cpp
+│   │   │   └── interfaces/
+│   │   │       ├── ithinking_system.h
+│   │   │       ├── imessage.h
+│   │   │       └── isync_protocol.h
+│   │   │
+│   │   └── memory_management/
+│   │       ├── pools/
+│   │       │   ├── object_pool.h
+│   │       │   ├── token_pool.h
+│   │       │   ├── pattern_pool.h
+│   │       │   └── ability_pool.h
+│   │       ├── buffers/
+│   │       │   ├── ring_buffer.h
+│   │       │   ├── priority_buffer.h
+│   │       │   └── double_buffer.h
+│   │       ├── caches/
+│   │       │   ├── lru_cache.h
+│   │       │   ├── pattern_cache.h
+│   │       │   └── prediction_cache.h
+│   │       └── garbage_collection/
+│   │           ├── gc_manager.h
+│   │           └── reference_counter.h
+│   │
+│   ├── music/
+│   │   ├── router/
+│   │   │   ├── music_router.h
+│   │   │   ├── music_router.cpp
+│   │   │   ├── token_to_music_mapper.h
+│   │   │   ├── token_to_music_mapper.cpp
+│   │   │   ├── musical_role_classifier.h
+│   │   │   ├── musical_role_classifier.cpp
+│   │   │   ├── adaptive_router.h
+│   │   │   └── adaptive_router.cpp
+│   │   ├── guardrails/
+│   │   │   ├── scale_locker.h
+│   │   │   ├── scale_locker.cpp
+│   │   │   ├── voice_manager.h
+│   │   │   ├── voice_manager.cpp
+│   │   │   ├── dissonance_preventer.h
+│   │   │   ├── dissonance_preventer.cpp
+│   │   │   ├── dynamic_range_controller.h
+│   │   │   ├── dynamic_range_controller.cpp
+│   │   │   ├── rhythm_quantizer.h
+│   │   │   └── rhythm_quantizer.cpp
+│   │   ├── synthesis/
+│   │   │   ├── sound_engine.h
+│   │   │   ├── sound_engine.cpp
+│   │   │   ├── synthesizers/
+│   │   │   │   ├── fm_synthesizer.h
+│   │   │   │   ├── fm_synthesizer.cpp
+│   │   │   │   ├── subtractive_synthesizer.h
+│   │   │   │   ├── subtractive_synthesizer.cpp
+│   │   │   │   ├── additive_synthesizer.h
+│   │   │   │   ├── additive_synthesizer.cpp
+│   │   │   │   ├── granular_synthesizer.h
+│   │   │   │   ├── granular_synthesizer.cpp
+│   │   │   │   ├── wavetable_synthesizer.h
+│   │   │   │   └── wavetable_synthesizer.cpp
+│   │   │   ├── effects/
+│   │   │   │   ├── reverb.h
+│   │   │   │   ├── reverb.cpp
+│   │   │   │   ├── delay.h
+│   │   │   │   ├── delay.cpp
+│   │   │   │   ├── chorus.h
+│   │   │   │   ├── chorus.cpp
+│   │   │   │   ├── distortion.h
+│   │   │   │   ├── distortion.cpp
+│   │   │   │   ├── filter.h
+│   │   │   │   ├── filter.cpp
+│   │   │   │   ├── compressor.h
+│   │   │   │   ├── compressor.cpp
+│   │   │   │   ├── limiter.h
+│   │   │   │   └── limiter.cpp
+│   │   │   └── mixing/
+│   │   │       ├── mixer.h
+│   │   │       ├── mixer.cpp
+│   │   │       ├── master_bus.h
+│   │   │       ├── master_bus.cpp
+│   │   │       ├── eq.h
+│   │   │       └── eq.cpp
+│   │   ├── adaptation/
+│   │   │   ├── tempo_extractor.h
+│   │   │   ├── tempo_extractor.cpp
+│   │   │   ├── intensity_mapper.h
+│   │   │   ├── intensity_mapper.cpp
+│   │   │   ├── context_adapter.h
+│   │   │   └── context_adapter.cpp
+│   │   └── interfaces/
+│   │       ├── imusic_router.h
+│   │       ├── isynthesizer.h
+│   │       ├── ieffect.h
+│   │       └── imixer.h
+│   │
+│   ├── abilities/
+│   │   ├── generation/
+│   │   │   ├── ability_generator.h
+│   │   │   ├── ability_generator.cpp
+│   │   │   ├── pattern_analyzer.h
+│   │   │   ├── pattern_analyzer.cpp
+│   │   │   ├── template_matcher.h
+│   │   │   ├── template_matcher.cpp
+│   │   │   ├── component_generator.h
+│   │   │   ├── component_generator.cpp
+│   │   │   ├── ability_balancer.h
+│   │   │   └── ability_balancer.cpp
+│   │   ├── evolution/
+│   │   │   ├── evolution_engine.h
+│   │   │   ├── evolution_engine.cpp
+│   │   │   ├── usage_tracker.h
+│   │   │   ├── usage_tracker.cpp
+│   │   │   ├── evolution_axes.h
+│   │   │   ├── evolution_axes.cpp
+│   │   │   ├── morph_controller.h
+│   │   │   ├── morph_controller.cpp
+│   │   │   ├── branch_manager.h
+│   │   │   └── branch_manager.cpp
+│   │   ├── crystallization/
+│   │   │   ├── crystallizer.h
+│   │   │   ├── crystallizer.cpp
+│   │   │   ├── stability_validator.h
+│   │   │   ├── stability_validator.cpp
+│   │   │   ├── unlock_ceremony.h
+│   │   │   └── unlock_ceremony.cpp
+│   │   ├── manifestation/
+│   │   │   ├── manifestation_engine.h
+│   │   │   ├── manifestation_engine.cpp
+│   │   │   ├── visual_generator.h
+│   │   │   ├── visual_generator.cpp
+│   │   │   ├── audio_generator.h
+│   │   │   ├── audio_generator.cpp
+│   │   │   ├── haptic_generator.h
+│   │   │   └── haptic_generator.cpp
+│   │   ├── templates/
+│   │   │   ├── ability_template.h
+│   │   │   ├── offensive_templates.cpp
+│   │   │   ├── defensive_templates.cpp
+│   │   │   ├── utility_templates.cpp
+│   │   │   ├── hybrid_templates.cpp
+│   │   │   └── custom_templates.cpp
+│   │   ├── balancing/
+│   │   │   ├── power_budget.h
+│   │   │   ├── power_budget.cpp
+│   │   │   ├── synergy_detector.h
+│   │   │   ├── synergy_detector.cpp
+│   │   │   ├── anti_pattern_checker.h
+│   │   │   └── anti_pattern_checker.cpp
+│   │   └── interfaces/
+│   │       ├── iability.h
+│   │       ├── igenerator.h
+│   │       ├── ievolution.h
+│   │       └── imanifestationплатform.h
+│   │
+│   ├── progression/
+│   │   ├── managers/
+│   │   │   ├── progression_manager.h
+│   │   │   ├── progression_manager.cpp
+│   │   │   ├── unlock_manager.h
+│   │   │   ├── unlock_manager.cpp
+│   │   │   ├── milestone_tracker.h
+│   │   │   └── milestone_tracker.cpp
+│   │   ├── systems/
+│   │   │   ├── constellation_builder.h
+│   │   │   ├── constellation_builder.cpp
+│   │   │   ├── choice_presenter.h
+│   │   │   ├── choice_presenter.cpp
+│   │   │   ├── mastery_tracker.h
+│   │   │   └── mastery_tracker.cpp
+│   │   └── persistence/
+│   │       ├── progression_serializer.h
+│   │       ├── progression_serializer.cpp
+│   │       ├── save_manager.h
+│   │       └── save_manager.cpp
+│   │
+│   ├── biometric/
+│   │   ├── sensors/
+│   │   │   ├── heart_rate_sensor.h
+│   │   │   ├── heart_rate_sensor.cpp
+│   │   │   ├── gaze_tracker.h
+│   │   │   ├── gaze_tracker.cpp
+│   │   │   ├── skin_conductance_sensor.h
+│   │   │   └── skin_conductance_sensor.cpp
+│   │   ├── privacy/
+│   │   │   ├── consent_manager.h
+│   │   │   ├── consent_manager.cpp
+│   │   │   ├── data_anonymizer.h
+│   │   │   ├── data_anonymizer.cpp
+│   │   │   ├── local_processor.h
+│   │   │   └── local_processor.cpp
+│   │   └── calibration/
+│   │       ├── baseline_calibrator.h
+│   │       ├── baseline_calibrator.cpp
+│   │       ├── noise_compensator.h
+│   │       └── noise_compensator.cpp
+│   │
+│   ├── integration/
+│   │   ├── game_loop/
+│   │   │   ├── main_loop.h
+│   │   │   ├── main_loop.cpp
+│   │   │   ├── frame_scheduler.h
+│   │   │   ├── frame_scheduler.cpp
+│   │   │   ├── update_orchestrator.h
+│   │   │   └── update_orchestrator.cpp
+│   │   ├── input/
+│   │   │   ├── input_manager.h
+│   │   │   ├── input_manager.cpp
+│   │   │   ├── controller_handler.h
+│   │   │   ├── keyboard_handler.h
+│   │   │   ├── mouse_handler.h
+│   │   │   └── touch_handler.h
+│   │   ├── rendering/
+│   │   │   ├── particle_renderer.h
+│   │   │   ├── particle_renderer.cpp
+│   │   │   ├── ability_visualizer.h
+│   │   │   ├── ability_visualizer.cpp
+│   │   │   ├── pattern_visualizer.h
+│   │   │   └── pattern_visualizer.cpp
+│   │   └── networking/
+│   │       ├── multiplayer_sync.h
+│   │       ├── multiplayer_sync.cpp
+│   │       ├── pattern_sharing.h
+│   │       └── pattern_sharing.cpp
+│   │
+│   ├── platform/
+│   │   ├── windows/
+│   │   │   ├── windows_audio.cpp
+│   │   │   ├── windows_input.cpp
+│   │   │   └── windows_haptic.cpp
+│   │   ├── linux/
+│   │   │   ├── linux_audio.cpp
+│   │   │   ├── linux_input.cpp
+│   │   │   └── linux_haptic.cpp
+│   │   ├── macos/
+│   │   │   ├── macos_audio.cpp
+│   │   │   ├── macos_input.cpp
+│   │   │   └── macos_haptic.cpp
+│   │   ├── playstation/
+│   │   │   ├── ps_audio.cpp
+│   │   │   ├── ps_input.cpp
+│   │   │   └── ps_haptic.cpp
+│   │   ├── xbox/
+│   │   │   ├── xbox_audio.cpp
+│   │   │   ├── xbox_input.cpp
+│   │   │   └── xbox_haptic.cpp
+│   │   └── switch/
+│   │       ├── switch_audio.cpp
+│   │       ├── switch_input.cpp
+│   │       └── switch_haptic.cpp
+│   │
+│   └── utilities/
+│       ├── math/
+│       │   ├── vector_math.h
+│       │   ├── matrix_math.h
+│       │   ├── statistics.h
+│       │   ├── signal_processing.h
+│       │   └── random.h
+│       ├── threading/
+│       │   ├── thread_pool.h
+│       │   ├── task_scheduler.h
+│       │   ├── lock_free_queue.h
+│       │   └── atomic_operations.h
+│       ├── profiling/
+│       │   ├── profiler.h
+│       │   ├── timer.h
+│       │   ├── memory_tracker.h
+│       │   └── performance_counter.h
+│       └── logging/
+│           ├── logger.h
+│           ├── log_formatter.h
+│           ├── log_writer.h
+│           └── crash_reporter.h
+│
+├── tests/
+│   ├── unit/
+│   │   ├── tokenization/
+│   │   │   ├── test_event_tokenizer.cpp
+│   │   │   ├── test_stream_tokenizer.cpp
+│   │   │   ├── test_enrichment.cpp
+│   │   │   └── test_privacy_filter.cpp
+│   │   ├── temporal_graph/
+│   │   │   ├── test_graph_operations.cpp
+│   │   │   ├── test_cooccurrence.cpp
+│   │   │   ├── test_graph_pruning.cpp
+│   │   │   └── test_persistence.cpp
+│   │   ├── pattern_detection/
+│   │   │   ├── test_motif_detection.cpp
+│   │   │   ├── test_rhythm_detection.cpp
+│   │   │   ├── test_community_detection.cpp
+│   │   │   └── test_stability.cpp
+│   │   ├── music/
+│   │   │   ├── test_music_router.cpp
+│   │   │   ├── test_scale_locking.cpp
+│   │   │   ├── test_voice_management.cpp
+│   │   │   └── test_dissonance.cpp
+│   │   ├── abilities/
+│   │   │   ├── test_generation.cpp
+│   │   │   ├── test_evolution.cpp
+│   │   │   ├── test_balancing.cpp
+│   │   │   └── test_manifestation.cpp
+│   │   └── dual_processing/
+│   │       ├── test_fast_thinking.cpp
+│   │       ├── test_slow_thinking.cpp
+│   │       └── test_synchronization.cpp
+│   │
+│   ├── integration/
+│   │   ├── test_full_pipeline.cpp
+│   │   ├── test_pattern_to_ability.cpp
+│   │   ├── test_music_generation.cpp
+│   │   ├── test_save_load.cpp
+│   │   └── test_multiplayer_sync.cpp
+│   │
+│   ├── performance/
+│   │   ├── benchmark_tokenization.cpp
+│   │   ├── benchmark_graph_update.cpp
+│   │   ├── benchmark_pattern_detection.cpp
+│   │   ├── benchmark_music_routing.cpp
+│   │   └── benchmark_memory_usage.cpp
+│   │
+│   ├── stress/
+│   │   ├── test_high_token_rate.cpp
+│   │   ├── test_large_graph.cpp
+│   │   ├── test_many_patterns.cpp
+│   │   └── test_memory_pressure.cpp
+│   │
+│   └── fixtures/
+│       ├── sample_patterns.json
+│       ├── test_tokens.dat
+│       ├── mock_biometric.csv
+│       └── reference_abilities.json
+│
+├── assets/
+│   ├── audio/
+│   │   ├── samples/
+│   │   │   ├── kicks/
+│   │   │   ├── snares/
+│   │   │   ├── hihats/
+│   │   │   ├── melodic/
+│   │   │   └── ambient/
+│   │   ├── impulse_responses/
+│   │   │   ├── halls/
+│   │   │   ├── rooms/
+│   │   │   └── plates/
+│   │   └── wavetables/
+│   │       ├── basic/
+│   │       ├── complex/
+│   │       └── custom/
+│   │
+│   ├── shaders/
+│   │   ├── particle/
+│   │   │   ├── basic_particle.vert
+│   │   │   ├── basic_particle.frag
+│   │   │   ├── ability_particle.vert
+│   │   │   └── ability_particle.frag
+│   │   ├── post_process/
+│   │   │   ├── bloom.frag
+│   │   │   ├── distortion.frag
+│   │   │   └── chromatic.frag
+│   │   └── compute/
+│   │       ├── particle_update.comp
+│   │       └── pattern_visual.comp
+│   │
+│   ├── textures/
+│   │   ├── particles/
+│   │   ├── abilities/
+│   │   └── ui/
+│   │
+│   └── data/
+│       ├── scales/
+│       │   ├── western_scales.json
+│       │   ├── eastern_scales.json
+│       │   └── custom_scales.json
+│       ├── templates/
+│       │   ├── ability_templates.json
+│       │   ├── pattern_templates.json
+│       │   └── music_templates.json
+│       └── tuning/
+│           ├── balance_curves.json
+│           ├── evolution_parameters.json
+│           └── difficulty_scaling.json
+│
+├── tools/
+│   ├── editor/
+│   │   ├── pattern_editor/
+│   │   │   ├── main.cpp
+│   │   │   ├── pattern_visualizer.cpp
+│   │   │   └── pattern_tweaker.cpp
+│   │   ├── ability_editor/
+│   │   │   ├── main.cpp
+│   │   │   ├── ability_designer.cpp
+│   │   │   └── balance_calculator.cpp
+│   │   ├── music_editor/
+│   │   │   ├── main.cpp
+│   │   │   ├── scale_designer.cpp
+│   │   │   └── synthesis_preview.cpp
+│   │   └── graph_editor/
+│   │       ├── main.cpp
+│   │       ├── graph_visualizer.cpp
+│   │       └── graph_analyzer.cpp
+│   │
+│   ├── debugging/
+│   │   ├── pattern_debugger/
+│   │   │   ├── main.cpp
+│   │   │   ├── live_monitor.cpp
+│   │   │   └── pattern_inspector.cpp
+│   │   ├── music_debugger/
+│   │   │   ├── main.cpp
+│   │   │   ├── audio_monitor.cpp
+│   │   │   └── voice_tracker.cpp
+│   │   └── performance_profiler/
+│   │       ├── main.cpp
+│   │       ├── frame_analyzer.cpp
+│   │       └── memory_profiler.cpp
+│   │
+│   ├── analytics/
+│   │   ├── pattern_analyzer/
+│   │   │   ├── main.cpp
+│   │   │   ├── statistical_analyzer.cpp
+│   │   │   └── report_generator.cpp
+│   │   ├── player_analytics/
+│   │   │   ├── main.cpp
+│   │   │   ├── behavior_analyzer.cpp
+│   │   │   └── progression_tracker.cpp
+│   │   └── ability_analytics/
+│   │       ├── main.cpp
+│   │       ├── usage_analyzer.cpp
+│   │       └── evolution_tracker.cpp
+│   │
+│   └── build_tools/
+│       ├── asset_pipeline/
+│       │   ├── audio_processor.py
+│       │   ├── shader_compiler.py
+│       │   └── data_validator.py
+│       ├── code_generation/
+│       │   ├── interface_generator.py
+│       │   ├── serialization_generator.py
+│       │   └── platform_wrapper_generator.py
+│       └── packaging/
+│           ├── build_release.py
+│           ├── generate_installer.py
+│           └── symbol_stripper.py
+│
+├── docs/
+│   ├── architecture/
+│   │   ├── system_overview.md
+│   │   ├── tokenization_architecture.md
+│   │   ├── temporal_graph_architecture.md
+│   │   ├── pattern_detection_architecture.md
+│   │   ├── music_system_architecture.md
+│   │   ├── ability_system_architecture.md
+│   │   └── dual_processing_architecture.md
+│   │
+│   ├── api/
+│   │   ├── core_api.md
+│   │   ├── music_api.md
+│   │   ├── ability_api.md
+│   │   ├── pattern_api.md
+│   │   └── integration_api.md
+│   │
+│   ├── guides/
+│   │   ├── getting_started.md
+│   │   ├── implementing_tokenizers.md
+│   │   ├── adding_patterns.md
+│   │   ├── creating_abilities.md
+│   │   ├── tuning_music.md
+│   │   └── performance_optimization.md
+│   │
+│   ├── design/
+│   │   ├── philosophy.md
+│   │   ├── pattern_design_principles.md
+│   │   ├── ability_design_guidelines.md
+│   │   ├── musical_aesthetics.md
+│   │   └── balancing_emergence.md
+│   │
+│   └── research/
+│       ├── papers/
+│       │   ├── emergent_gameplay.pdf
+│       │   ├── behavioral_pattern_mining.pdf
+│       │   └── adaptive_music_generation.pdf
+│       └── postmortems/
+│           ├── year1_learnings.md
+│           ├── year2_learnings.md
+│           ├── year3_learnings.md
+│           ├── year4_learnings.md
+│           └── year5_retrospective.md
+│
+├── config/
+│   ├── development/
+│   │   ├── tokenization.yaml
+│   │   ├── graph.yaml
+│   │   ├── patterns.yaml
+│   │   ├── music.yaml
+│   │   ├── abilities.yaml
+│   │   └── debug.yaml
+│   ├── staging/
+│   │   └── [similar structure]
+│   ├── production/
+│   │   └── [similar structure]
+│   └── platform/
+│       ├── pc.yaml
+│       ├── console.yaml
+│       └── mobile.yaml
+│
+├── scripts/
+│   ├── development/
+│   │   ├── setup_dev_environment.sh
+│   │   ├── run_tests.sh
+│   │   ├── generate_mocks.py
+│   │   └── sync_assets.sh
+│   ├── deployment/
+│   │   ├── deploy_staging.sh
+│   │   ├── deploy_production.sh
+│   │   ├── rollback.sh
+│   │   └── health_check.py
+│   ├── analysis/
+│   │   ├── analyze_patterns.py
+│   │   ├── visualize_graph.py
+│   │   ├── generate_reports.py
+│   │   └── extract_metrics.py
+│   └── maintenance/
+│       ├── cleanup_logs.sh
+│       ├── optimize_database.py
+│       ├── backup_data.sh
+│       └── migrate_saves.py
+│
+├── third_party/
+│   ├── eigen/
+│   ├── fftw/
+│   ├── boost/
+│   ├── catch2/
+│   ├── spdlog/
+│   ├── cereal/
+│   ├── rtaudio/
+│   ├── sokol/
+│   └── imgui/
+│
+├── build/
+│   ├── cmake/
+│   │   ├── FindFFTW.cmake
+│   │   ├── FindRtAudio.cmake
+│   │   └── Platform.cmake
+│   ├── android/
+│   ├── ios/
+│   └── web/
+│
+├── CMakeLists.txt
+├── README.md
+├── LICENSE
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
+├── .gitignore
+├── .clang-format
+├── .clang-tidy
+├── .editorconfig
+└── Doxyfile
