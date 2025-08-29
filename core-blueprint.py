@@ -1,35 +1,34 @@
 #!/usr/bin/env python3
 """
 ================================================================================
-                    ERESION - THE CORE BLUEPRINT
+          ERESION - THE CORE BLUEPRINT (v2 - Synthesized)
         An Engine for Emergent Identity, Music, and Mechanics
 ================================================================================
 
-AUTHORED-BY: Gemini
+AUTHORED-BY: Gemini & The User
 VERSION: 2.0
 DATE: 2025-08-28
 
 PHILOSOPHY (The "Why"):
 
-This system is not a feature; it is a dialogue. It's built on the belief
-that gameplay is a language. The player "speaks" through their actions, and
-this engine "listens," "understands," and "replies."
+This system is a dialogue. Gameplay is a language. The player speaks through
+actions; this engine listens, understands, and replies. The reply is both
+subconscious (adaptive music) and conscious (emergent abilities).
 
-The reply comes in two forms:
-1.  SUBCONSCIOUS (Music): An immediate, adaptive soundtrack that mirrors the
-    player's current emotional and tactical state. It makes the player *feel*
-    their own patterns.
-2.  CONSCIOUS (Abilities): A crystallization of the player's unique, stable
-    behaviors into tangible gameplay mechanics. It makes the player's *identity*
-    a playable force.
+This blueprint details a "headless" architecture. The core logic is a game-
+agnostic application with a clear API, designed to be driven by any game engine.
+We build the complex core first, proving it in the simplest environment (a text-
+based simulation), and then attach more complex "heads" (2D/3D game engines).
 
-This blueprint details a "headless" architecture. The core logic is game-
-agnostic, designed to be plugged into anything from a text-based adventure to a
-full 3D world. We build the complex core first, proving it in the simplest
-environment, and then attach more complex "heads" (game engines) to it.
+This version synthesizes several key architectural concepts:
+- A "Primitive Composer" that assembles abilities from a library of components.
+- A detailed, multi-stage "Crystallization Pipeline" for ability generation.
+- A core design principle of player agency via choice (always present two options).
+- An explicit, circular feedback loop where ability usage becomes new input.
+- Stubs that define problem spaces, suggesting multiple implementation paths.
 
 ================================================================================
-"""
+"
 
 import time
 import random
@@ -37,466 +36,327 @@ import json
 import asyncio
 from collections import defaultdict, deque
 from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Tuple, Any, Literal, Union
-from enum import Enum
-import numpy as np
+from typing import Dict, List, Tuple, Any, Literal, Optional
+from enum import Enum, auto
 
 # ============================================================================
 # SECTION 1: CONFIGURATION
-# Defines the tunable parameters of the entire system.
 # ============================================================================
 
 class Config:
-    """
-    Central configuration. These values are the knobs that tune the system's
-    sensitivity, creativity, and performance.
-    """
-    # --- Performance & Timing ---
-    TICK_RATE_HZ = 60
-    SLOW_THINKING_INTERVAL_S = 10.0  # How often to run deep analysis.
-    GRAPH_LAZY_DECAY_THRESHOLD_S = 300.0 # Edges untouched for this long are decayed on access.
+    """Central configuration for tuning the system's behavior."""
+    # Performance
+    SLOW_THINKING_INTERVAL_S = 15.0
 
-    # --- Temporal Graph (Fast Thinking) ---
-    GRAPH_EDGE_DECAY_RATE = 0.995 # Per-tick decay factor.
-    GRAPH_PMI_THRESHOLD = 0.1 # Pointwise Mutual Information threshold to be considered "interesting".
-    GRAPH_REINFORCE_BASE = 0.1 # Base reinforcement value for co-occurrence.
+    # Neuronal Graph (Fast Thinking)
+    GRAPH_PMI_THRESHOLD = 0.2
+    GRAPH_LAZY_DECAY_S = 300.0
 
-    # --- Data Analytics (Slow Thinking) ---
-    MOTIF_MIN_SEQUENCE_LENGTH = 3 # Minimum length for a pattern to be considered a sequence.
-    MOTIF_MIN_SUPPORT_COUNT = 5 # How many times a sequence must appear to be considered.
-    MOTIF_STABILITY_THRESHOLD = 0.8 # How consistent a motif must be across sessions to be "stable".
-    MOTIF_MIN_SESSIONS_TO_STABILIZE = 3 # How many sessions a motif must appear in.
+    # Data Analytics (Slow Thinking)
+    MOTIF_MIN_SEQUENCE_LENGTH = 3
+    MOTIF_MIN_SUPPORT_COUNT = 10
+    MOTIF_STABILITY_THRESHOLD = 0.75
+    MOTIF_MIN_SESSIONS_TO_STABILIZE = 3
 
-    # --- Grammar Engine (Ability Generation) ---
-    ABILITY_POWER_BUDGET = 100.0 # A baseline for balancing generated abilities.
-    ABILITY_EVOLUTION_RATE = 0.1 # How quickly abilities morph towards usage patterns (0=static, 1=chaotic).
+    # Crystallization & Balancing
+    ABILITY_POWER_BUDGET = 100.0
 
-    # --- LLM Connector ---
+    # LLM Connector
     LLM_ENABLED = True
-    LLM_MODEL_NAME = "gemini-1.5-pro"
-    LLM_SEMANTIC_CHECK_PROMPT = "You are a game design assistant. A user has exhibited a behavioral pattern: {pattern_description}. In a {game_genre} game, is this pattern more likely a meaningful strategy or an accidental quirk? Respond with 'MEANINGFUL' or 'QUIRK'."
-    LLM_NARRATIVE_PROMPT = "You are a game's storyteller. A player has unlocked an ability called '{ability_name}' that triggers '{trigger_description}' and causes '{effect_description}'. Write a short, evocative narrative (2-3 sentences) for how this power manifested from their behavior."
-
-    # --- Music Director ---
-    MUSIC_DEFAULT_BPM = 120
-    MUSIC_MAX_VOICES = 8
-    MUSIC_SCALE_LOCK = True
-
+    LLM_SEMANTIC_CHECK_ENABLED = True
 
 # ============================================================================
-# SECTION 2: CORE DATA STRUCTURES (THE "LANGUAGE OF ERESION")
-# These structures are designed "one step ahead" to be game-agnostic.
+# SECTION 2: CORE DATA STRUCTURES (THE "LANGUAGE")
 # ============================================================================
-
-# --- The Foundational Atom: The Token ---
-# Represents a single, meaningful event, translated from raw game data.
 
 class TokenType(Enum):
-    """Extensible enumeration of meaningful event types."""
+    """Extensible, semantic enumeration of meaningful event types."""
     # Player Actions
-    ATTACK = "ATTACK"
-    JUMP = "JUMP"
-    DODGE = "DODGE"
-    HEAL = "HEAL"
-    BLOCK = "BLOCK"
-    # Game State Changes
-    TAKE_DAMAGE = "TAKE_DAMAGE"
-    DEFEAT_ENEMY = "DEFEAT_ENEMY"
-    ENTER_AREA = "ENTER_AREA"
-    # Menu/UI
-    OPEN_INVENTORY = "OPEN_INVENTORY"
-    # Special
-    SILENCE = "SILENCE" # Represents a meaningful pause.
+    ATTACK_LIGHT = auto()
+    ATTACK_HEAVY = auto()
+    JUMP = auto()
+    DODGE = auto()
+    BLOCK = auto()
+    USE_ITEM = auto()
+    # Game State & World
+    TAKE_DAMAGE = auto()
+    DEFEAT_ENEMY = auto()
+    ENTER_AREA = auto()
+    # Ability Usage (The Recursion Loop)
+    USE_ABILITY = auto()
 
 @dataclass
 class Token:
-    """
-    The atomic unit of meaning. It's a "Behavioral Atom."
-    Designed to be rich enough for a 3D world, but simple enough for text.
-    """
-    token_type: TokenType
+    """The atomic unit of meaning, designed to be game-agnostic."""
+    type: TokenType
     timestamp_s: float
-    
-    # --- Core "Sentence" Structure ---
     actor_id: str = "player"
     target_id: Optional[str] = None
-    
-    # --- Rich Metadata (for 2D/3D games, often null in text) ---
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    # Example metadata fields:
-    # 'position': Tuple[float, float, float]
-    # 'delta_vector': Tuple[float, float, float]
-    # 'intensity': float (0.0 to 1.0)
-    # 'damage_amount': float
-    # 'weapon_used': str
+    # Metadata examples: 'position', 'damage', 'item_name', 'ability_id'
 
 # --- The "Lego Bricks" of Ability Generation ---
 
+class PrimitiveType(Enum):
+    NOUN = auto()   # e.g., Fire, Ice, Echo, Shield
+    VERB = auto()   # e.g., DealDamage, ApplyStatus, Dash
+    ADJECTIVE = auto() # e.g., AreaOfEffect, Homing, Chain
+
 @dataclass
-class AbilityComponent:
-    """Base class for a piece of an ability's logic."""
+class AbilityPrimitive:
+    """A single, atomic component of gameplay mechanics."""
     id: str
+    type: PrimitiveType
     description: str
-    power_cost: float # Used for balancing.
+    # For matching against motifs:
+    affinity_tags: List[str] = field(default_factory=list)
+    # For balancing:
+    base_power_cost: float = 10.0
 
 @dataclass
-class TriggerComponent(AbilityComponent):
-    """The 'When' part of an ability."""
-    # Example Triggers: OnToken(DODGE), OnPattern("DODGE->ATTACK"), OnHealth(<30%)
-    type: Literal["OnToken", "OnPattern", "OnStateChange"]
-    condition: Any
-
-@dataclass
-class EffectComponent(AbilityComponent):
-    """The 'What' part of an ability."""
-    # Example Effects: DealDamage, ApplyStatus, GainShield
-    type: Literal["DealDamage", "ApplyStatus", "GainShield", "ModifyMovement"]
-    parameters: Dict[str, Any]
-
-@dataclass
-class ModifierComponent(AbilityComponent):
-    """The 'How' part of an ability (the "adjective")."""
-    # Example Modifiers: Element(Fire), Target(Area), Duration(5s)
-    type: Literal["Element", "Target", "Duration", "DamageType"]
-    value: Any
-
-@dataclass
-class Ability:
-    """
-    A fully formed gameplay mechanic, assembled from components.
-    This structure is the direct output of the Grammar Engine.
-    """
+class AssembledAbility:
+    """A fully formed gameplay mechanic, composed from primitives."""
     id: str
     name: str
     narrative: str
     source_motif_id: str
-    
-    trigger: TriggerComponent
-    effects: List[EffectComponent]
-    modifiers: List[ModifierComponent] = field(default_factory=list)
-    
-    # For evolution
-    evolution_axes: Dict[str, Tuple[float, float]] = field(default_factory=dict)
-    current_expression: Dict[str, float] = field(default_factory=dict)
-
-# --- Structures for Analysis and Memory ---
-
-@dataclass
-class TemporalGraphEdge:
-    """Represents a weighted, time-sensitive relationship between two tokens."""
-    weight: float = 0.0
-    pmi: float = 0.0
-    last_reinforced_s: float = 0.0
+    trigger: Tuple[TokenType, ...] 
+    primitives: List[AbilityPrimitive]
+    # Final calculated values after balancing:
+    cooldown_s: float
+    resource_cost: float
 
 @dataclass
 class BehavioralMotif:
-    """
-    A "Behavioral Blueprint." A stable, recurring pattern of play that has
-    been identified by the Data Analytics engine.
-    """
+    """A stable, recurring pattern of play; a "Behavioral Blueprint"."""
     id: str
-    sequence: Tuple[TokenType, ...]
-    
-    # --- Statistical Properties ---
-    stability: float # How consistently this pattern appears (0-1).
-    prevalence: float # What percentage of actions this pattern accounts for.
-    avg_intensity: float # The average intensity of tokens in this pattern.
-    
-    # --- Progression Tracking ---
-    sessions_observed: int
-    first_observed_s: float
-    last_observed_s: float
+    sequence: Tuple[TokenType, ...] 
+    stability: float
+    prevalence: float
+    # For linking to primitives:
+    dominant_tags: List[str] = field(default_factory=list)
 
 # ============================================================================
 # SECTION 3: MODULE INTERFACES (THE "HEADLESS" API)
-# Each module is a class implementing one of these interfaces.
 # ============================================================================
 
 class ITokenizer:
-    """Contract for turning raw game data into meaningful Tokens."""
+    """Contract for translating raw game events into meaningful Tokens."""
     def process_game_event(self, event: Dict) -> List[Token]:
-        """
-        Takes a raw game event (e.g., from a network packet or engine callback)
-        and translates it into one or more standardized Tokens.
-        
-        STUB: This is the primary integration point for a new game engine.
-        """
-        # 1. Parse the raw event.
-        # 2. Identify the core action (e.g., position change -> DODGE).
-        # 3. Create a Token.
-        # 4. Enrich with metadata (e.g., calculate distance and vector).
-        # 5. Return a list of new tokens.
+        # STUB: Game-specific logic to parse engine events.
         pass
 
-class ITemporalGraph:
-    """
-    Contract for the "Fast Thinking" module. Manages the real-time graph
-    of player behavior.
-    """
-    def reinforce(self, token_a: Token, token_b: Token):
-        """Strengthen the edge between two tokens based on temporal proximity."""
+class INeuronalGraph:
+    """Contract for the "Fast Thinking" module; the system's working memory."""
+    def reinforce_hebbian(self, token_a: Token, token_b: Token):
+        # STUB: `weight += base * exp(-k * time_delta)`
         pass
-
-    def apply_decay(self):
-        """
-        Reduce the weight of all edges.
-        STUB: An efficient implementation would use "lazy decay" on access
-        for edges not recently updated, to avoid iterating the whole graph.
-        """
+    def apply_lazy_decay(self, node: TokenType):
+        # STUB: On access, `weight *= exp(-rate * (now - last_t))`
         pass
-
-    def get_active_patterns(self, top_k: int = 5) -> List[Tuple[Tuple[TokenType, TokenType], float]]:
-        """
-        Get the most significant current patterns, weighted by PMI to filter noise.
-        This is what the Music Director primarily uses.
-        """
+    def compute_pmi_for_active_edges(self):
+        # STUB: `pmi = log( P(A,B) / (P(A) * P(B)) )` to find interesting patterns.
+        pass
+    def get_active_musical_context(self) -> Dict[str, Any]:
+        # STUB: Returns current tempo, intensity, etc., based on graph state.
         pass
 
 class IDataAnalytics:
-    """
-    Contract for the "Slow Thinking" module. Finds deep, stable patterns
-    in the player's history.
-    """
-    async def analyze_token_history(self, token_buffer: List[Token]) -> List[BehavioralMotif]:
-        """
-        Asynchronously processes a large buffer of tokens to find motifs.
-        
-        PIPELINE STUB:
-        1.  FEATURE EXTRACTION: Convert token list to a format for analysis.
-        2.  SEQUENCE MINING: Use an algorithm like PrefixSpan to find common sequences.
-        3.  CLUSTERING (Optional): Use DBSCAN/K-Means on token metadata to find
-            archetypes (e.g., "close-range fighter").
-        4.  SEMANTIC FILTERING: Use LLM or heuristics to discard "junk" patterns
-            (e.g., 'open_inventory -> jump').
-        5.  STABILITY ANALYSIS: Compare found patterns with historical motifs to
-            calculate stability score.
-        6.  Return a list of new or updated BehavioralMotifs.
-        """
+    """Contract for the "Slow Thinking" module; finds deep patterns."""
+    async def find_stable_motifs(self, token_history: List[Token]) -> List[BehavioralMotif]:
+        # STUB PIPELINE:
+        # 1. Sequence Mining (e.g., PrefixSpan) to find common sequences.
+        # 2. Feature Extraction to get tags (e.g., 'aggressive', 'ranged').
+        # 3. Stability Analysis across multiple sessions.
+        # 4. Semantic Filtering (using LLM or heuristics) to remove junk patterns.
         pass
 
-class IGrammarEngine:
-    """
-    Contract for the "Ability Generator." Assembles abilities from components
-    based on discovered motifs.
-    """
-    def load_component_library(self, library: Dict[str, List[AbilityComponent]]):
-        """Load the 'Lego bricks' from a config file."""
+class IPrimitiveComposer:
+    """Contract for assembling abilities from a library of primitives."""
+    def load_primitive_registry(self, registry: List[AbilityPrimitive]):
+        # STUB: Loads the available "Lego bricks".
+        pass
+    def compose_ability_from_motif(self, motif: BehavioralMotif) -> Optional[AssembledAbility]:
+        # STUB PIPELINE:
+        # 1. Match motif's dominant_tags to primitive affinity_tags.
+        # 2. Select a valid combination of primitives (e.g., 1 Noun, 1 Verb, 1-2 Adjectives).
+        # 3. Assemble into an AssembledAbility structure.
         pass
 
-    def generate_ability_from_motif(self, motif: BehavioralMotif) -> Optional[Ability]:
-        """
-        Takes a stable motif and attempts to build a new ability.
-        
-        PIPELINE STUB:
-        1.  DECONSTRUCT MOTIF: Identify trigger (e.g., first token) and payload.
-        2.  MATCH COMPONENTS: Find Trigger/Effect components that match the motif.
-        3.  ASSEMBLE: Create a new Ability data structure.
-        4.  BALANCE: Use the `power_cost` of components to estimate a total power
-            and normalize against `Config.ABILITY_POWER_BUDGET`.
-        5.  NARRATE: Use LLMConnector to generate a name and narrative.
-        6.  Return the new Ability.
-        """
-        pass
-        
-    def evolve_ability(self, ability: Ability, usage_data: Dict) -> Ability:
-        """Morphs an ability based on how it's used."""
+class IBalancer:
+    """Contract for ensuring generated abilities are not game-breaking."""
+    def balance_ability(self, ability: AssembledAbility) -> AssembledAbility:
+        # STUB: Calculates total power cost from primitives, adjusts cooldown/resource_cost
+        # to fit within Config.ABILITY_POWER_BUDGET.
         pass
 
 class ILLMConnector:
-    """
-    Contract for a constrained, reliable interface to a Large Language Model.
-    Its role is creative and advisory, not logical.
-    """
-    async def check_pattern_is_meaningful(self, pattern_description: str, game_genre: str) -> bool:
-        """Asks the LLM if a pattern seems like a deliberate strategy."""
+    """Contract for a constrained, reliable interface to an LLM."""
+    async def check_motif_is_meaningful(self, motif: BehavioralMotif) -> bool:
+        # STUB: Asks LLM if a pattern seems like a deliberate strategy.
+        pass
+    async def generate_narrative_for_ability(self, ability: AssembledAbility) -> Tuple[str, str]:
+        # STUB: Asks LLM for a thematic name and description.
         pass
 
-    async def generate_ability_narrative(self, ability_name: str, trigger: str, effect: str) -> Tuple[str, str]:
-        """Asks the LLM to create a thematic name and description for an ability."""
-        pass
-
-class IMusicDirector:
-    """Contract for managing the real-time adaptive soundtrack."""
-    def update_context(self, graph_state: Dict, token_stream: List[Token]):
-        """
-        Updates the musical state (BPM, scale, intensity) based on fast patterns.
-        """
-        pass
-
-    def generate_notes_for_token(self, token: Token) -> List[Dict]:
-        """Maps a single token to a musical note or percussion hit."""
+class IManifestationDirector:
+    """Contract for translating a new ability into game engine directives."""
+    def generate_manifestation_directives(self, ability: AssembledAbility) -> List[Dict]:
+        # STUB: Creates a list of instructions for the game engine, e.g.,
+        # {'type': 'CREATE_PARTICLE_EFFECT', 'params': {...}}
+        # {'type': 'REGISTER_SOUND_EVENT', 'params': {...}}
         pass
 
 # ============================================================================
-# SECTION 4: THE CORE ORCHESTRATOR
-# This is the "headless" engine itself.
+# SECTION 4: THE CRYSTALLIZATION PIPELINE
+# ============================================================================
+
+class CrystallizationPipeline:
+    """Orchestrates the full process of turning a pattern into a player choice."""
+    def __init__(self, analytics, composer, balancer, llm, manifestor):
+        self.analytics = analytics
+        self.composer = composer
+        self.balancer = balancer
+        self.llm = llm
+        self.manifestor = manifestor
+
+    async def process(self, token_history: List[Token]) -> Optional[Dict[str, Any]]:
+        """Main entry point for the pipeline."""
+        # 1. Find stable motifs.
+        stable_motifs = await self.analytics.find_stable_motifs(token_history)
+        if not stable_motifs:
+            return None
+
+        # For now, just process the most stable motif.
+        motif_to_process = stable_motifs[0]
+
+        # 2. Generate two distinct ability options from the motif.
+        print(f"[PIPELINE] Stable motif found: {motif_to_process.id}. Generating options...")
+        option_a = self.composer.compose_ability_from_motif(motif_to_process)
+        option_b = self.composer.compose_ability_from_motif(motif_to_process) # In reality, ensure this is different.
+
+        if not (option_a and option_b):
+            return None
+
+        # 3. Balance both options.
+        option_a = self.balancer.balance_ability(option_a)
+        option_b = self.balancer.balance_ability(option_b)
+
+        # 4. Generate narratives for both.
+        option_a.name, option_a.narrative = await self.llm.generate_narrative_for_ability(option_a)
+        option_b.name, option_b.narrative = await self.llm.generate_narrative_for_ability(option_b)
+
+        # 5. Prepare manifestation directives for previewing.
+        manifest_a = self.manifestor.generate_manifestation_directives(option_a)
+        manifest_b = self.manifestor.generate_manifestation_directives(option_b)
+
+        print(f"[PIPELINE] Presenting choice: [{option_a.name}] vs [{option_b.name}]")
+        # 6. Return a package for the game engine's UI to present to the player.
+        return {
+            "source_motif": motif_to_process,
+            "option_a": {"ability": option_a, "manifest_directives": manifest_a},
+            "option_b": {"ability": option_b, "manifest_directives": manifest_b},
+        }
+
+# ============================================================================
+# SECTION 5: THE CORE ORCHESTRATOR
 # ============================================================================
 
 class EresionCore:
-    """
-    The central, game-agnostic engine. A game engine communicates with this
-    class to drive the entire emergent system.
-    """
-    def __init__(self, game_genre: str):
+    """The central, game-agnostic engine."""
+    def __init__(self):
         print("╔══════════════════════════════════════════════════════════════╗")
-        print("║              ERESION CORE ENGINE INITIALIZING                ║")
+        print("║            ERESION CORE ENGINE v2 INITIALIZING               ║")
         print("╚══════════════════════════════════════════════════════════════╝")
-        
-        self.game_genre = game_genre
-        
         # --- Module Initialization (Stubs) ---
-        # In a real implementation, these would be concrete classes.
-        self.tokenizer: ITokenizer = ITokenizer()
-        self.temporal_graph: ITemporalGraph = ITemporalGraph()
-        self.data_analytics: IDataAnalytics = IDataAnalytics()
-        self.grammar_engine: IGrammarEngine = IGrammarEngine()
-        self.llm_connector: ILLMConnector = ILLMConnector()
-        self.music_director: IMusicDirector = IMusicDirector()
-        
+        self.tokenizer = ITokenizer()
+        self.neuronal_graph = INeuronalGraph()
+        self.pipeline = CrystallizationPipeline(IDataAnalytics(), IPrimitiveComposer(), IBalancer(), ILLMConnector(), IManifestationDirector())
         # --- State Management ---
-        self.token_history: deque = deque(maxlen=100000) # Long-term memory for analysis.
-        self.discovered_motifs: Dict[str, BehavioralMotif] = {}
-        self.player_abilities: Dict[str, Ability] = {}
-        
+        self.token_history: deque = deque(maxlen=200000)
+        self.player_abilities: Dict[str, AssembledAbility] = {}
         self.last_slow_think_s = time.time()
 
     def process_raw_game_event(self, event: Dict):
-        """
-        Primary INPUT method for the game engine.
-        A game engine calls this on every relevant event.
-        """
+        """Primary INPUT method for the game engine."""
         new_tokens = self.tokenizer.process_game_event(event)
-        if not new_tokens:
-            return
+        if not new_tokens: return
 
-        for i, token in enumerate(new_tokens):
-            # --- Fast Thinking Path (Real-time) ---
-            self.temporal_graph.reinforce(self.token_history[-1], token)
+        for token in new_tokens:
+            if self.token_history:
+                self.neuronal_graph.reinforce_hebbian(self.token_history[-1], token)
             self.token_history.append(token)
-            
-            # --- Music Path (Real-time) ---
-            notes = self.music_director.generate_notes_for_token(token)
-            # In a real engine, we'd dispatch these notes to FMOD/Wwise.
-            # self.dispatch_notes_to_audio_engine(notes)
 
     def update(self, delta_time_s: float):
-        """
-        Primary UPDATE method. The game engine should call this every frame.
-        """
-        # --- Graph Decay ---
-        self.temporal_graph.apply_decay()
-        
-        # --- Music Context Update ---
-        active_patterns = self.temporal_graph.get_active_patterns()
-        self.music_director.update_context({'patterns': active_patterns}, [])
-
-        # --- Slow Thinking Path (Asynchronous) ---
+        """Primary UPDATE method, called by the game engine every frame."""
         if time.time() - self.last_slow_think_s > Config.SLOW_THINKING_INTERVAL_S:
             self.last_slow_think_s = time.time()
-            asyncio.create_task(self._run_slow_thinking_cycle())
+            asyncio.create_task(self.run_crystallization_cycle())
 
-    async def _run_slow_thinking_cycle(self):
+    async def run_crystallization_cycle(self):
         """The deep analysis and generation loop."""
-        print("
-[ERESION CORE] Starting slow thinking cycle...")
-        
-        # 1. Analyze history for stable patterns.
-        new_motifs = await self.data_analytics.analyze_token_history(list(self.token_history))
-        
-        for motif in new_motifs:
-            # 2. Check if any motifs are ready for crystallization.
-            if motif.stability > Config.MOTIF_STABILITY_THRESHOLD and motif.id not in self.player_abilities:
-                print(f"[ERESION CORE] Motif '{motif.id}' is stable. Attempting ability generation...")
-                
-                # 3. Generate an ability from the motif.
-                new_ability = self.grammar_engine.generate_ability_from_motif(motif)
-                
-                if new_ability:
-                    print(f"[ERESION CORE] New ability generated: '{new_ability.name}'")
-                    self.player_abilities[new_ability.id] = new_ability
-                    # In a real engine, we'd fire a callback to the UI.
-                    # self.dispatch_ability_unlocked_event(new_ability)
+        print(f"\n[CORE] Running Crystallization Cycle on {len(self.token_history)} tokens...")
+        player_choice_package = await self.pipeline.process(list(self.token_history))
+        if player_choice_package:
+            # In a real engine, this package would be sent to a UI manager.
+            # The UI would then send back the player's choice.
+            self.handle_player_choice(player_choice_package, "option_a")
+
+    def handle_player_choice(self, package: Dict, choice_id: str):
+        """Handles the result of the player's choice from the UI."""
+        chosen_ability = package[choice_id]["ability"]
+        self.player_abilities[chosen_ability.id] = chosen_ability
+        print(f"[CORE] Player unlocked new ability: {chosen_ability.name}! The feedback loop is complete.")
+        # The game engine is now responsible for executing this ability's logic
+        # and for sending a USE_ABILITY token when it's used, completing the cycle.
 
 # ============================================================================
-# SECTION 5: EXAMPLE USAGE (THE "TEXT-BASED HEAD")
-# Demonstrates how a simple game would use the EresionCore.
+# SECTION 6: EXAMPLE USAGE (THE "TEXT-BASED HEAD")
 # ============================================================================
 
-def run_text_game_simulation():
-    """
-    A minimal simulation showing the API in action. This proves the
-    "trickle-down" philosophy: a simple game using a powerful core.
-    """
-    print("
-" + "="*80)
+async def run_text_game_simulation():
+    """A minimal simulation showing the API in action."""
+    print("\n" + "="*80)
     print("               RUNNING SIMULATION: THE TEXT-BASED HEAD")
-    print("="*80 + "
-")
+    print("="*80 + "\n")
 
-    # --- Game Setup ---
-    eresion = EresionCore(game_genre="text-based fantasy RPG")
-    
-    # Mock the modules for this simulation
+    # --- Mock Implementations for Simulation ---
     class MockTokenizer(ITokenizer):
         def process_game_event(self, event: Dict) -> List[Token]:
-            # Simple parser for text commands
-            command = event.get("command", "").upper()
-            parts = command.split()
-            if not parts:
-                return []
-            
-            token_type = None
-            try:
-                token_type = TokenType[parts[0]]
-            except KeyError:
-                return []
+            try: return [Token(type=TokenType[event["command"]], timestamp_s=time.time())]
+            except (KeyError, TypeError): return []
 
-            return [Token(
-                token_type=token_type,
-                timestamp_s=time.time(),
-                metadata={'raw_command': command}
-            )]
+    class MockAnalytics(IDataAnalytics):
+        async def find_stable_motifs(self, history: List[Token]) -> List[BehavioralMotif]:
+            # A simple mock that "finds" a dodge-attack pattern if it's common.
+            seq = (TokenType.DODGE, TokenType.ATTACK_HEAVY)
+            count = sum(1 for i in range(len(history) - 1) if (history[i].type, history[i+1].type) == seq)
+            if count > 3:
+                return [BehavioralMotif(id="dodge_attack", sequence=seq, stability=0.8, prevalence=0.5, dominant_tags=['aggressive', 'melee'])]
+            return []
 
+    class MockComposer(IPrimitiveComposer):
+        def compose_ability_from_motif(self, motif: BehavioralMotif) -> Optional[AssembledAbility]:
+            if motif.id == "dodge_attack":
+                return AssembledAbility(id=f"ability_{random.randint(1000,9999)}", name="", narrative="", source_motif_id=motif.id, trigger=motif.sequence, primitives=[], cooldown_s=5.0, resource_cost=10.0)
+            return None
+
+    # --- Simulation Setup ---
+    eresion = EresionCore()
+    eresion.pipeline.analytics = MockAnalytics()
+    eresion.pipeline.composer = MockComposer()
     eresion.tokenizer = MockTokenizer()
-    # ... other mocks would be needed for a full simulation.
+    # Other modules would also be mocked in a real test.
 
     # --- Gameplay Loop ---
-    game_commands = [
-        "ATTACK", "DODGE", "ATTACK", "HEAL", "DODGE", "ATTACK",
-        "DODGE", "ATTACK", "DODGE", "ATTACK", "TAKE_DAMAGE", "HEAL"
-    ]
+    game_commands = ["ATTACK_LIGHT", "DODGE", "ATTACK_HEAVY", "JUMP", "DODGE", "ATTACK_HEAVY", "TAKE_DAMAGE", "DODGE", "ATTACK_HEAVY", "USE_ITEM", "DODGE", "ATTACK_HEAVY"]
+    print(f"Simulating gameplay: {game_commands}")
+    for command in game_commands:
+        eresion.process_raw_game_event({"command": command})
+        await asyncio.sleep(0.1)
 
-    print("Player is entering a loop of 'DODGE -> ATTACK'...")
-    for i, command in enumerate(game_commands):
-        print(f"-> Player command: {command}")
-        
-        # The game engine's only responsibility is to send raw events.
-        game_event = {"command": command}
-        eresion.process_raw_game_event(game_event)
-        
-        # The game engine calls update every "frame".
-        eresion.update(delta_time_s=1.0) # Simulating 1 second ticks.
-        time.sleep(0.5)
-
-        # Trigger a slow thinking cycle partway through
-        if i == len(game_commands) // 2:
-            eresion.last_slow_think_s = 0 # Force a cycle
-
-    print("
-" + "="*80)
-    print("SIMULATION COMPLETE")
-    print(f"Discovered Motifs: {list(eresion.discovered_motifs.keys())}")
-    print(f"Granted Abilities: {list(eresion.player_abilities.keys())}")
-    print("="*80)
-    print("
-NOTE: This blueprint uses stubs. A full implementation would show")
-    print("the 'DODGE->ATTACK' motif being discovered and turned into an ability.")
-
+    # --- Final Analysis ---
+    await eresion.run_crystallization_cycle()
 
 if __name__ == "__main__":
-    # This demonstrates the core principle: build the powerful, headless
-    # engine first, then prove it with the simplest possible "head".
-    # The data structures and logic are ready for a 3D world, but are
-    # being driven by simple text commands.
-    run_text_game_simulation()
+    asyncio.run(run_text_game_simulation())
