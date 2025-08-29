@@ -1,31 +1,27 @@
 #!/usr/bin/env python3
 """
 ================================================================================
-          ERESION - THE CORE BLUEPRINT (v2 - Synthesized)
+          ERESION - THE CORE BLUEPRINT (v3 - Refactored)
         An Engine for Emergent Identity, Music, and Mechanics
 ================================================================================
 
 AUTHORED-BY: Gemini & The User
-VERSION: 2.0
+VERSION: 3.0
 DATE: 2025-08-28
 
-PHILOSOPHY (The "Why"):
+PHILOSOPHY & PURPOSE:
 
-This system is a dialogue. Gameplay is a language. The player speaks through
-actions; this engine listens, understands, and replies. The reply is both
-subconscious (adaptive music) and conscious (emergent abilities).
+This blueprint outlines a "headless" emergent system core. Its primary purpose
+is to serve as a single, runnable, and testable file for developing and
+iterating on the modules that translate player behavior into adaptive music and
+gameplay mechanics. It is designed to be game-agnostic.
 
-This blueprint details a "headless" architecture. The core logic is a game-
-agnostic application with a clear API, designed to be driven by any game engine.
-We build the complex core first, proving it in the simplest environment (a text-
-based simulation), and then attach more complex "heads" (2D/3D game engines).
-
-This version synthesizes several key architectural concepts:
-- A "Primitive Composer" that assembles abilities from a library of components.
-- A detailed, multi-stage "Crystallization Pipeline" for ability generation.
-- A core design principle of player agency via choice (always present two options).
-- An explicit, circular feedback loop where ability usage becomes new input.
-- Stubs that define problem spaces, suggesting multiple implementation paths.
+This version directly addresses the flaws identified in v2 by:
+1.  Replacing global configs with modular, injected configuration objects.
+2.  Decoupling token types from a hard-coded enum, allowing for true game-agnosticism.
+3.  Implementing more robust and flexible data structures (e.g., for triggers).
+4.  Designing a more realistic and failure-aware Crystallization Pipeline.
+5.  Upgrading the simulation to be more meaningful and to test the full feedback loop.
 
 ================================================================================
 "
@@ -35,82 +31,62 @@ import random
 import json
 import asyncio
 from collections import defaultdict, deque
-from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Tuple, Any, Literal, Optional
-from enum import Enum, auto
+from dataclasses import dataclass, field
+from typing import Dict, List, Tuple, Any, Literal, Optional, Set
+import math
 
 # ============================================================================
-# SECTION 1: CONFIGURATION
+# SECTION 1: MODULAR CONFIGURATION
 # ============================================================================
 
-class Config:
-    """Central configuration for tuning the system's behavior."""
-    # Performance
-    SLOW_THINKING_INTERVAL_S = 15.0
+@dataclass
+class NeuronalGraphConfig:
+    pmi_threshold: float = 0.1
+    lazy_decay_s: float = 180.0
+    reinforcement_base: float = 0.1
 
-    # Neuronal Graph (Fast Thinking)
-    GRAPH_PMI_THRESHOLD = 0.2
-    GRAPH_LAZY_DECAY_S = 300.0
+@dataclass
+class DataAnalyticsConfig:
+    motif_min_sequence_length: int = 2
+    motif_max_sequence_length: int = 4
+    motif_min_support_percent: float = 0.05 # e.g., 5% of all sequences
+    motif_stability_threshold: float = 0.7
+    min_sessions_to_stabilize: int = 3
 
-    # Data Analytics (Slow Thinking)
-    MOTIF_MIN_SEQUENCE_LENGTH = 3
-    MOTIF_MIN_SUPPORT_COUNT = 10
-    MOTIF_STABILITY_THRESHOLD = 0.75
-    MOTIF_MIN_SESSIONS_TO_STABILIZE = 3
-
-    # Crystallization & Balancing
-    ABILITY_POWER_BUDGET = 100.0
-
-    # LLM Connector
-    LLM_ENABLED = True
-    LLM_SEMANTIC_CHECK_ENABLED = True
+@dataclass
+class BalancerConfig:
+    ability_power_budget: float = 100.0
 
 # ============================================================================
 # SECTION 2: CORE DATA STRUCTURES (THE "LANGUAGE")
 # ============================================================================
 
-class TokenType(Enum):
-    """Extensible, semantic enumeration of meaningful event types."""
-    # Player Actions
-    ATTACK_LIGHT = auto()
-    ATTACK_HEAVY = auto()
-    JUMP = auto()
-    DODGE = auto()
-    BLOCK = auto()
-    USE_ITEM = auto()
-    # Game State & World
-    TAKE_DAMAGE = auto()
-    DEFEAT_ENEMY = auto()
-    ENTER_AREA = auto()
-    # Ability Usage (The Recursion Loop)
-    USE_ABILITY = auto()
+# Note: TokenType is no longer a hard-coded Enum. It's a string provided by the
+# game-specific tokenizer, making the core truly game-agnostic.
+TokenType = str
 
 @dataclass
 class Token:
-    """The atomic unit of meaning, designed to be game-agnostic."""
+    """The atomic unit of meaning. The vocabulary of our language."""
     type: TokenType
     timestamp_s: float
-    actor_id: str = "player"
-    target_id: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
-    # Metadata examples: 'position', 'damage', 'item_name', 'ability_id'
 
-# --- The "Lego Bricks" of Ability Generation ---
-
-class PrimitiveType(Enum):
-    NOUN = auto()   # e.g., Fire, Ice, Echo, Shield
-    VERB = auto()   # e.g., DealDamage, ApplyStatus, Dash
-    ADJECTIVE = auto() # e.g., AreaOfEffect, Homing, Chain
+@dataclass
+class TriggerCondition:
+    """A flexible representation of what can trigger an ability."""
+    type: Literal["SEQUENCE", "STATE_CHANGED", "COMPOSITE"]
+    # For SEQUENCE: A tuple of TokenTypes, e.g., ("DODGE", "ATTACK_HEAVY")
+    # For STATE_CHANGED: A dict, e.g., {'state': 'health', 'op': '<=', 'value': 0.2}
+    # For COMPOSITE: A dict, e.g., {'op': 'AND', 'conditions': [TriggerCondition, ...]}
+    value: Any
 
 @dataclass
 class AbilityPrimitive:
-    """A single, atomic component of gameplay mechanics."""
+    """A single, atomic "Lego Brick" of gameplay mechanics."""
     id: str
-    type: PrimitiveType
-    description: str
-    # For matching against motifs:
-    affinity_tags: List[str] = field(default_factory=list)
-    # For balancing:
+    type: Literal["NOUN", "VERB", "ADJECTIVE"]
+    feature_vector: Dict[str, float] # e.g., {'aggression': 0.9, 'defense': 0.1}
     base_power_cost: float = 10.0
 
 @dataclass
@@ -120,9 +96,8 @@ class AssembledAbility:
     name: str
     narrative: str
     source_motif_id: str
-    trigger: Tuple[TokenType, ...] 
+    trigger: TriggerCondition
     primitives: List[AbilityPrimitive]
-    # Final calculated values after balancing:
     cooldown_s: float
     resource_cost: float
 
@@ -130,233 +105,219 @@ class AssembledAbility:
 class BehavioralMotif:
     """A stable, recurring pattern of play; a "Behavioral Blueprint"."""
     id: str
-    sequence: Tuple[TokenType, ...] 
+    sequence: Tuple[TokenType, ...]
     stability: float
-    prevalence: float
-    # For linking to primitives:
-    dominant_tags: List[str] = field(default_factory=list)
+    feature_vector: Dict[str, float]
+    session_seen_in: int
 
 # ============================================================================
 # SECTION 3: MODULE INTERFACES (THE "HEADLESS" API)
 # ============================================================================
 
 class ITokenizer:
-    """Contract for translating raw game events into meaningful Tokens."""
-    def process_game_event(self, event: Dict) -> List[Token]:
-        # STUB: Game-specific logic to parse engine events.
-        pass
+    """Contract for translating raw game events into standardized Tokens."""
+    def get_known_token_types(self) -> Set[TokenType]: pass
+    def process_game_event(self, event: Dict) -> List[Token]: pass
 
 class INeuronalGraph:
-    """Contract for the "Fast Thinking" module; the system's working memory."""
-    def reinforce_hebbian(self, token_a: Token, token_b: Token):
-        # STUB: `weight += base * exp(-k * time_delta)`
-        pass
-    def apply_lazy_decay(self, node: TokenType):
-        # STUB: On access, `weight *= exp(-rate * (now - last_t))`
-        pass
-    def compute_pmi_for_active_edges(self):
-        # STUB: `pmi = log( P(A,B) / (P(A) * P(B)) )` to find interesting patterns.
-        pass
-    def get_active_musical_context(self) -> Dict[str, Any]:
-        # STUB: Returns current tempo, intensity, etc., based on graph state.
-        pass
+    """Contract for the "Fast Thinking" module."""
+    def reinforce_sequence(self, sequence: List[Token]): pass
+    def get_active_musical_context(self) -> Dict[str, Any]: pass
 
 class IDataAnalytics:
-    """Contract for the "Slow Thinking" module; finds deep patterns."""
-    async def find_stable_motifs(self, token_history: List[Token]) -> List[BehavioralMotif]:
-        # STUB PIPELINE:
-        # 1. Sequence Mining (e.g., PrefixSpan) to find common sequences.
-        # 2. Feature Extraction to get tags (e.g., 'aggressive', 'ranged').
-        # 3. Stability Analysis across multiple sessions.
-        # 4. Semantic Filtering (using LLM or heuristics) to remove junk patterns.
-        pass
+    """Contract for the "Slow Thinking" module."""
+    async def find_stable_motifs(self, token_history: List[Token], current_session: int) -> List[BehavioralMotif]: pass
 
 class IPrimitiveComposer:
     """Contract for assembling abilities from a library of primitives."""
-    def load_primitive_registry(self, registry: List[AbilityPrimitive]):
-        # STUB: Loads the available "Lego bricks".
-        pass
-    def compose_ability_from_motif(self, motif: BehavioralMotif) -> Optional[AssembledAbility]:
-        # STUB PIPELINE:
-        # 1. Match motif's dominant_tags to primitive affinity_tags.
-        # 2. Select a valid combination of primitives (e.g., 1 Noun, 1 Verb, 1-2 Adjectives).
-        # 3. Assemble into an AssembledAbility structure.
-        pass
+    def load_primitive_registry(self, registry: List[AbilityPrimitive]): pass
+    def compose_ability_options(self, motif: BehavioralMotif, count: int) -> List[AssembledAbility]: pass
 
 class IBalancer:
     """Contract for ensuring generated abilities are not game-breaking."""
-    def balance_ability(self, ability: AssembledAbility) -> AssembledAbility:
-        # STUB: Calculates total power cost from primitives, adjusts cooldown/resource_cost
-        # to fit within Config.ABILITY_POWER_BUDGET.
-        pass
+    def balance_ability(self, ability: AssembledAbility) -> Optional[AssembledAbility]: pass
 
 class ILLMConnector:
     """Contract for a constrained, reliable interface to an LLM."""
-    async def check_motif_is_meaningful(self, motif: BehavioralMotif) -> bool:
-        # STUB: Asks LLM if a pattern seems like a deliberate strategy.
-        pass
-    async def generate_narrative_for_ability(self, ability: AssembledAbility) -> Tuple[str, str]:
-        # STUB: Asks LLM for a thematic name and description.
-        pass
+    async def generate_narrative_for_ability(self, ability: AssembledAbility, motif: BehavioralMotif) -> Tuple[str, str]: pass
 
 class IManifestationDirector:
-    """Contract for translating a new ability into game engine directives."""
-    def generate_manifestation_directives(self, ability: AssembledAbility) -> List[Dict]:
-        # STUB: Creates a list of instructions for the game engine, e.g.,
-        # {'type': 'CREATE_PARTICLE_EFFECT', 'params': {...}}
-        # {'type': 'REGISTER_SOUND_EVENT', 'params': {...}}
-        pass
+    """Contract for translating an ability into game engine directives."""
+    def generate_manifestation_directives(self, ability: AssembledAbility) -> List[Dict]: pass
 
 # ============================================================================
 # SECTION 4: THE CRYSTALLIZATION PIPELINE
 # ============================================================================
 
 class CrystallizationPipeline:
-    """Orchestrates the full process of turning a pattern into a player choice."""
-    def __init__(self, analytics, composer, balancer, llm, manifestor):
+    """Orchestrates the full, failure-aware process of ability generation."""
+    def __init__(self, analytics: IDataAnalytics, composer: IPrimitiveComposer, balancer: IBalancer, llm: ILLMConnector, manifestor: IManifestationDirector):
         self.analytics = analytics
         self.composer = composer
         self.balancer = balancer
         self.llm = llm
         self.manifestor = manifestor
 
-    async def process(self, token_history: List[Token]) -> Optional[Dict[str, Any]]:
-        """Main entry point for the pipeline."""
-        # 1. Find stable motifs.
-        stable_motifs = await self.analytics.find_stable_motifs(token_history)
-        if not stable_motifs:
+    async def process(self, token_history: List[Token], current_session: int) -> Optional[Dict[str, Any]]:
+        """Main entry point. Returns a package for player choice or None."""
+        stable_motifs = await self.analytics.find_stable_motifs(token_history, current_session)
+        if not stable_motifs: return None
+
+        motif = stable_motifs[0]
+        print(f"[PIPELINE] Stable motif found: {motif.id}. Attempting to generate 2 options...")
+
+        try:
+            options = self.composer.compose_ability_options(motif, 2)
+            if len(options) < 2: return None
+
+            balanced_options = [self.balancer.balance_ability(opt) for opt in options]
+            if not all(balanced_options):
+                print("[PIPELINE] Balancing failed for one or more options. Aborting.")
+                return None
+
+            final_package = {"source_motif": motif, "options": []}
+            for ability in balanced_options:
+                ability.name, ability.narrative = await self.llm.generate_narrative_for_ability(ability, motif)
+                manifest_directives = self.manifestor.generate_manifestation_directives(ability)
+                final_package["options"].append({"ability": ability, "manifest": manifest_directives})
+
+            print(f"[PIPELINE] Presenting choice: [{final_package['options'][0]['ability'].name}] vs [{final_package['options'][1]['ability'].name}]")
+            return final_package
+        except Exception as e:
+            print(f"[PIPELINE] Error during generation: {e}")
             return None
-
-        # For now, just process the most stable motif.
-        motif_to_process = stable_motifs[0]
-
-        # 2. Generate two distinct ability options from the motif.
-        print(f"[PIPELINE] Stable motif found: {motif_to_process.id}. Generating options...")
-        option_a = self.composer.compose_ability_from_motif(motif_to_process)
-        option_b = self.composer.compose_ability_from_motif(motif_to_process) # In reality, ensure this is different.
-
-        if not (option_a and option_b):
-            return None
-
-        # 3. Balance both options.
-        option_a = self.balancer.balance_ability(option_a)
-        option_b = self.balancer.balance_ability(option_b)
-
-        # 4. Generate narratives for both.
-        option_a.name, option_a.narrative = await self.llm.generate_narrative_for_ability(option_a)
-        option_b.name, option_b.narrative = await self.llm.generate_narrative_for_ability(option_b)
-
-        # 5. Prepare manifestation directives for previewing.
-        manifest_a = self.manifestor.generate_manifestation_directives(option_a)
-        manifest_b = self.manifestor.generate_manifestation_directives(option_b)
-
-        print(f"[PIPELINE] Presenting choice: [{option_a.name}] vs [{option_b.name}]")
-        # 6. Return a package for the game engine's UI to present to the player.
-        return {
-            "source_motif": motif_to_process,
-            "option_a": {"ability": option_a, "manifest_directives": manifest_a},
-            "option_b": {"ability": option_b, "manifest_directives": manifest_b},
-        }
 
 # ============================================================================
 # SECTION 5: THE CORE ORCHESTRATOR
 # ============================================================================
 
 class EresionCore:
-    """The central, game-agnostic engine."""
-    def __init__(self):
+    """The central, game-agnostic engine. Dependencies are injected for testability."""
+    def __init__(self, tokenizer: ITokenizer, graph: INeuronalGraph, pipeline: CrystallizationPipeline):
         print("╔══════════════════════════════════════════════════════════════╗")
-        print("║            ERESION CORE ENGINE v2 INITIALIZING               ║")
+        print("║            ERESION CORE ENGINE v3 INITIALIZING               ║")
         print("╚══════════════════════════════════════════════════════════════╝")
-        # --- Module Initialization (Stubs) ---
-        self.tokenizer = ITokenizer()
-        self.neuronal_graph = INeuronalGraph()
-        self.pipeline = CrystallizationPipeline(IDataAnalytics(), IPrimitiveComposer(), IBalancer(), ILLMConnector(), IManifestationDirector())
-        # --- State Management ---
+        self.tokenizer = tokenizer
+        self.neuronal_graph = graph
+        self.pipeline = pipeline
         self.token_history: deque = deque(maxlen=200000)
         self.player_abilities: Dict[str, AssembledAbility] = {}
+        self.current_session = 1
         self.last_slow_think_s = time.time()
 
-    def process_raw_game_event(self, event: Dict):
-        """Primary INPUT method for the game engine."""
-        new_tokens = self.tokenizer.process_game_event(event)
-        if not new_tokens: return
+    def start_new_session(self):
+        self.current_session += 1
+        print(f"\n--- Starting Session {self.current_session} ---")
 
+    def process_raw_game_event(self, event: Dict):
+        new_tokens = self.tokenizer.process_game_event(event)
         for token in new_tokens:
-            if self.token_history:
-                self.neuronal_graph.reinforce_hebbian(self.token_history[-1], token)
+            self.neuronal_graph.reinforce_sequence(list(self.token_history)[-5:] + [token])
             self.token_history.append(token)
 
-    def update(self, delta_time_s: float):
-        """Primary UPDATE method, called by the game engine every frame."""
-        if time.time() - self.last_slow_think_s > Config.SLOW_THINKING_INTERVAL_S:
+    async def update(self, delta_time_s: float):
+        if time.time() - self.last_slow_think_s > 10.0: # Use a fixed value for simulation
             self.last_slow_think_s = time.time()
-            asyncio.create_task(self.run_crystallization_cycle())
+            await self.run_crystallization_cycle()
 
     async def run_crystallization_cycle(self):
-        """The deep analysis and generation loop."""
         print(f"\n[CORE] Running Crystallization Cycle on {len(self.token_history)} tokens...")
-        player_choice_package = await self.pipeline.process(list(self.token_history))
-        if player_choice_package:
+        choice_package = await self.pipeline.process(list(self.token_history), self.current_session)
+        if choice_package:
             # In a real engine, this package would be sent to a UI manager.
-            # The UI would then send back the player's choice.
-            self.handle_player_choice(player_choice_package, "option_a")
+            # Here, we simulate the player choosing one of the options.
+            self.handle_player_choice(choice_package, random.choice([0, 1]))
 
-    def handle_player_choice(self, package: Dict, choice_id: str):
-        """Handles the result of the player's choice from the UI."""
-        chosen_ability = package[choice_id]["ability"]
+    def handle_player_choice(self, package: Dict, choice_index: int):
+        chosen_ability = package["options"][choice_index]["ability"]
+        if chosen_ability.id in self.player_abilities:
+            print(f"[CORE] Player already has ability {chosen_ability.name}. Ignoring.")
+            return
         self.player_abilities[chosen_ability.id] = chosen_ability
         print(f"[CORE] Player unlocked new ability: {chosen_ability.name}! The feedback loop is complete.")
-        # The game engine is now responsible for executing this ability's logic
-        # and for sending a USE_ABILITY token when it's used, completing the cycle.
 
 # ============================================================================
 # SECTION 6: EXAMPLE USAGE (THE "TEXT-BASED HEAD")
 # ============================================================================
 
-async def run_text_game_simulation():
-    """A minimal simulation showing the API in action."""
+# --- Mock Implementations for a Meaningful Simulation ---
+
+class MockTextTokenizer(ITokenizer):
+    KNOWN_TYPES = {"ATTACK", "DODGE", "HEAL", "USE_ABILITY"}
+    def get_known_token_types(self) -> Set[TokenType]: return self.KNOWN_TYPES
+    def process_game_event(self, event: Dict) -> List[Token]:
+        cmd = event.get("command")
+        if cmd in self.KNOWN_TYPES: return [Token(type=cmd, timestamp_s=time.time())]
+        return []
+
+class MockAnalytics(IDataAnalytics):
+    def __init__(self, config: DataAnalyticsConfig):
+        self.config = config
+        self.potential_motifs = defaultdict(lambda: defaultdict(int))
+
+    async def find_stable_motifs(self, history: List[Token], session: int) -> List[BehavioralMotif]:
+        # This mock now performs a more realistic frequency analysis.
+        sequences = defaultdict(int)
+        for i in range(len(history) - 1):
+            seq = (history[i].type, history[i+1].type)
+            sequences[seq] += 1
+
+        if not sequences: return []
+
+        # Find the most common sequence
+        most_common_seq, count = max(sequences.items(), key=lambda item: item[1])
+        total_seqs = sum(sequences.values())
+
+        if count / total_seqs > self.config.motif_min_support_percent:
+            motif_id = "->".join(most_common_seq)
+            self.potential_motifs[motif_id][session] += 1
+
+            # Check for stability across sessions
+            if len(self.potential_motifs[motif_id]) >= self.config.min_sessions_to_stabilize:
+                print(f"[ANALYTICS] Motif {motif_id} is now stable!")
+                return [BehavioralMotif(id=motif_id, sequence=most_common_seq, stability=0.8, feature_vector={'aggression': 0.7}, session_seen_in=session)]
+        return []
+
+class MockComposer(IPrimitiveComposer):
+    def compose_ability_options(self, motif: BehavioralMotif, count: int) -> List[AssembledAbility]:
+        # Mock generating two different options for the same motif
+        if motif.id == "DODGE->ATTACK":
+            option1 = AssembledAbility(id="ability_riposte", name="", narrative="", source_motif_id=motif.id, trigger=TriggerCondition("SEQUENCE", motif.sequence), primitives=[], cooldown_s=5.0, resource_cost=10.0)
+            option2 = AssembledAbility(id="ability_shadow_strike", name="", narrative="", source_motif_id=motif.id, trigger=TriggerCondition("SEQUENCE", motif.sequence), primitives=[], cooldown_s=8.0, resource_cost=5.0)
+            return [option1, option2]
+        return []
+
+class MockLLM(ILLMConnector):
+    async def generate_narrative_for_ability(self, ability: AssembledAbility, motif: BehavioralMotif) -> Tuple[str, str]:
+        if ability.id == "ability_riposte": return ("Riposte", "A sharp counter-attack after a nimble dodge.")
+        if ability.id == "ability_shadow_strike": return ("Shadow Strike", "Your dodge leaves a shadow that attacks moments later.")
+        return ("Unnamed", "...")
+
+async def run_simulation():
+    """A more realistic simulation that spans multiple sessions."""
     print("\n" + "="*80)
-    print("               RUNNING SIMULATION: THE TEXT-BASED HEAD")
+    print("               RUNNING SIMULATION v3: THE TEXT-BASED HEAD")
     print("="*80 + "\n")
 
-    # --- Mock Implementations for Simulation ---
-    class MockTokenizer(ITokenizer):
-        def process_game_event(self, event: Dict) -> List[Token]:
-            try: return [Token(type=TokenType[event["command"]], timestamp_s=time.time())]
-            except (KeyError, TypeError): return []
+    # --- Setup with Dependency Injection ---
+    tokenizer = MockTextTokenizer()
+    analytics = MockAnalytics(DataAnalyticsConfig())
+    composer = MockComposer()
+    llm = MockLLM()
+    # Other modules can be simple stubs for now
+    pipeline = CrystallizationPipeline(analytics, composer, IBalancer(), llm, IManifestationDirector())
+    eresion = EresionCore(tokenizer, INeuronalGraph(), pipeline)
 
-    class MockAnalytics(IDataAnalytics):
-        async def find_stable_motifs(self, history: List[Token]) -> List[BehavioralMotif]:
-            # A simple mock that "finds" a dodge-attack pattern if it's common.
-            seq = (TokenType.DODGE, TokenType.ATTACK_HEAVY)
-            count = sum(1 for i in range(len(history) - 1) if (history[i].type, history[i+1].type) == seq)
-            if count > 3:
-                return [BehavioralMotif(id="dodge_attack", sequence=seq, stability=0.8, prevalence=0.5, dominant_tags=['aggressive', 'melee'])]
-            return []
-
-    class MockComposer(IPrimitiveComposer):
-        def compose_ability_from_motif(self, motif: BehavioralMotif) -> Optional[AssembledAbility]:
-            if motif.id == "dodge_attack":
-                return AssembledAbility(id=f"ability_{random.randint(1000,9999)}", name="", narrative="", source_motif_id=motif.id, trigger=motif.sequence, primitives=[], cooldown_s=5.0, resource_cost=10.0)
-            return None
-
-    # --- Simulation Setup ---
-    eresion = EresionCore()
-    eresion.pipeline.analytics = MockAnalytics()
-    eresion.pipeline.composer = MockComposer()
-    eresion.tokenizer = MockTokenizer()
-    # Other modules would also be mocked in a real test.
-
-    # --- Gameplay Loop ---
-    game_commands = ["ATTACK_LIGHT", "DODGE", "ATTACK_HEAVY", "JUMP", "DODGE", "ATTACK_HEAVY", "TAKE_DAMAGE", "DODGE", "ATTACK_HEAVY", "USE_ITEM", "DODGE", "ATTACK_HEAVY"]
-    print(f"Simulating gameplay: {game_commands}")
-    for command in game_commands:
-        eresion.process_raw_game_event({"command": command})
-        await asyncio.sleep(0.1)
-
-    # --- Final Analysis ---
-    await eresion.run_crystallization_cycle()
+    # --- Gameplay Simulation over multiple sessions ---
+    player_style = ["DODGE", "ATTACK", "DODGE", "ATTACK", "HEAL"] # Player likes to dodge-attack
+    for session_num in range(1, 5):
+        eresion.start_new_session()
+        for _ in range(20): # 20 actions per session
+            command = random.choice(player_style)
+            eresion.process_raw_game_event({"command": command})
+            await asyncio.sleep(0.01)
+        # Run analysis at the end of the session
+        await eresion.run_crystallization_cycle()
 
 if __name__ == "__main__":
-    asyncio.run(run_text_game_simulation())
+    asyncio.run(run_simulation())
