@@ -38,7 +38,7 @@ import math
 # from eresion.data_structures import Token, AssembledAbility, ...
 # For this single-file example, we import from the interfaces file.
 
-from eresion_interfaces import (
+from interfaces import (
     # Configs
     NeuronalGraphConfig, DataAnalyticsConfig, BalancerConfig,
     # Schemas
@@ -61,7 +61,9 @@ class TextTokenizer(ITokenizer):
     def process_game_event(self, event: Dict) -> List[Token]:
         cmd = event.get("command")
         if cmd in self.KNOWN_TYPES:
-            return [Token(type=cmd, timestamp_s=time.time(), metadata={"intensity": random.uniform(0.5, 1.0)})]
+            token = Token(type=cmd, timestamp_s=time.time(), metadata={"intensity": random.uniform(0.5, 1.0)})
+            print(f"[TOKENIZER] Generated token: {token.type}")
+            return [token]
         return []
 
 class SimpleNeuronalGraph(INeuronalGraph):
@@ -96,16 +98,22 @@ class SimpleDataAnalytics(IDataAnalytics):
 
         if not sequences: return []
         total_seqs = sum(sequences.values())
-        most_common_seq, count = max(sequences.items(), key=lambda item: item[1])
-
-        if count / total_seqs > self.config.motif_min_support_percent:
-            motif_id = "->".join(most_common_seq)
-            self.potential_motifs[motif_id][current_session] = count
-            if len(self.potential_motifs[motif_id]) >= self.config.min_sessions_to_stabilize:
-                print(f"[ANALYTICS] Motif '{motif_id}' is now stable!")
-                feature_vector = {"aggression": 0.7, "defense": 0.3} # Mock vector
-                return [BehavioralMotif(id=motif_id, sequence=most_common_seq, stability=0.8, feature_vector=feature_vector, session_seen_in=current_session)]
-        return []
+        
+        print(f"[ANALYTICS] Session {current_session}: Found sequences: {dict(sequences)}")
+        
+        # Track all sequences that meet the threshold, not just the most common
+        stable_motifs = []
+        for seq, count in sequences.items():
+            if count / total_seqs > self.config.motif_min_support_percent:
+                motif_id = "->".join(seq)
+                self.potential_motifs[motif_id][current_session] = count
+                print(f"[ANALYTICS] Motif '{motif_id}' seen in {len(self.potential_motifs[motif_id])} sessions (ratio: {count/total_seqs:.3f})")
+                if len(self.potential_motifs[motif_id]) >= self.config.min_sessions_to_stabilize:
+                    print(f"[ANALYTICS] Motif '{motif_id}' is now stable!")
+                    feature_vector = {"aggression": 0.7, "defense": 0.3} # Mock vector
+                    stable_motifs.append(BehavioralMotif(id=motif_id, sequence=seq, stability=0.8, feature_vector=feature_vector, session_seen_in=current_session))
+        
+        return stable_motifs
 
 class SimplePrimitiveComposer(IPrimitiveComposer):
     """MVP implementation for assembling abilities."""
@@ -116,10 +124,13 @@ class SimplePrimitiveComposer(IPrimitiveComposer):
         self.registry = registry
 
     def compose_ability_options(self, motif: BehavioralMotif, count: int) -> List[AssembledAbility]:
-        if not self.registry or motif.id != "DODGE->ATTACK": return []
-        # For MVP, we hard-code the composition for our target motif.
-        option1 = AssembledAbility(id="ability_riposte", name="", narrative="", source_motif_id=motif.id, trigger=TriggerCondition("SEQUENCE", motif.sequence), primitives=[self.registry[0]], cooldown_s=5.0, resource_cost=10.0)
-        option2 = AssembledAbility(id="ability_shadow_strike", name="", narrative="", source_motif_id=motif.id, trigger=TriggerCondition("SEQUENCE", motif.sequence), primitives=[self.registry[1]], cooldown_s=8.0, resource_cost=5.0)
+        if not self.registry: return []
+        print(f"[COMPOSER] Composing abilities for motif: {motif.id}")
+        
+        # For MVP, we generate abilities for any stable motif
+        ability_name = motif.id.lower().replace("->", "_")
+        option1 = AssembledAbility(id=f"ability_{ability_name}_1", name="", narrative="", source_motif_id=motif.id, trigger=TriggerCondition("SEQUENCE", motif.sequence), primitives=[self.registry[0]], cooldown_s=5.0, resource_cost=10.0)
+        option2 = AssembledAbility(id=f"ability_{ability_name}_2", name="", narrative="", source_motif_id=motif.id, trigger=TriggerCondition("SEQUENCE", motif.sequence), primitives=[self.registry[1]], cooldown_s=8.0, resource_cost=5.0)
         return [option1, option2]
 
 class SimpleBalancer(IBalancer):
@@ -131,9 +142,20 @@ class SimpleBalancer(IBalancer):
 class MockLLMConnector(ILLMConnector):
     """Mock LLM for narrative generation."""
     async def generate_narrative_for_ability(self, ability: AssembledAbility, motif: BehavioralMotif) -> Tuple[str, str]:
-        if ability.id == "ability_riposte": return ("Riposte", "A sharp counter-attack after a nimble dodge.")
-        if ability.id == "ability_shadow_strike": return ("Shadow Strike", "Your dodge leaves a shadow that attacks moments later.")
-        return ("Unnamed", "...")
+        # Generate names based on the motif pattern
+        motif_parts = motif.id.split("->")
+        if len(motif_parts) == 2:
+            first, second = motif_parts
+            if "_1" in ability.id:
+                name = f"{first.title()}-{second.title()} Combo"
+                desc = f"A powerful technique combining {first.lower()} with {second.lower()}."
+            else:
+                name = f"Enhanced {second.title()}"
+                desc = f"An improved {second.lower()} technique inspired by your {first.lower()} patterns."
+        else:
+            name = f"Signature Move"
+            desc = f"A unique ability born from your {motif.id} behavioral pattern."
+        return (name, desc)
 
 class SimpleManifestationDirector(IManifestationDirector):
     """MVP implementation for generating directives."""
@@ -190,7 +212,8 @@ class EresionCore:
             self.token_history.append(token)
 
     async def update(self):
-        if time.time() - self.last_slow_think_s > 5.0: # Shortened for demo
+        print(f"[CORE] Update called. Time since last slow think: {time.time() - self.last_slow_think_s:.2f}s")
+        if time.time() - self.last_slow_think_s > 1.0: # Much shorter for demo
             self.last_slow_think_s = time.time()
             await self.run_crystallization_cycle()
 
@@ -202,6 +225,8 @@ class EresionCore:
             if chosen_ability.id not in self.player_abilities:
                 self.player_abilities[chosen_ability.id] = chosen_ability
                 print(f"[CORE] Player unlocked new ability: {chosen_ability.name}! The feedback loop is complete.")
+        else:
+            print(f"[CORE] No stable motifs found in session {self.current_session}")
 
 # ============================================================================ 
 # SECTION 4: SIMULATION ENTRY POINT
@@ -215,7 +240,7 @@ async def main():
 
     # --- 1. Setup with Dependency Injection ---
     tokenizer = TextTokenizer()
-    analytics = SimpleDataAnalytics(DataAnalyticsConfig())
+    analytics = SimpleDataAnalytics(DataAnalyticsConfig(min_sessions_to_stabilize=2))
     composer = SimplePrimitiveComposer()
     composer.load_primitive_registry([
         AbilityPrimitive("riposte_verb", "VERB", {"aggression": 0.8, "defense": 0.2}, 30.0),
@@ -232,7 +257,8 @@ async def main():
             command = random.choice(player_style)
             eresion.process_raw_game_event({"command": command})
             await asyncio.sleep(0.01)
-        await eresion.update()
+        await eresion.update()  # Run crystallization after each session
+        await asyncio.sleep(0.5)  # Brief pause between sessions
 
     print("\n" + "="*80)
     print("SIMULATION COMPLETE")
