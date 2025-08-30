@@ -3,8 +3,8 @@ from typing import Dict, List, Optional, Any
 import time
 from itertools import combinations
 from interfaces import Token, AssembledAbility
-from modules import SimpleNeuronalGraph, SimpleDataAnalytics, SimplePrimitiveComposer, SimpleBalancer, MockLLMConnector, SimpleManifestationDirector
-from game_state import GameState
+from .modules import SimpleNeuronalGraph, SimpleDataAnalytics, SimplePrimitiveComposer, SimpleBalancer, MockLLMConnector, SimpleManifestationDirector
+from .game_state import GameState
 
 class CrystallizationPipeline:
     def __init__(self, analytics: SimpleDataAnalytics, composer: SimplePrimitiveComposer, balancer: SimpleBalancer, llm: MockLLMConnector, manifestor: SimpleManifestationDirector):

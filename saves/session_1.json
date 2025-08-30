@@ -1,0 +1,1723 @@
+{
+  "session": 1,
+  "player_location": "Deep Forest",
+  "player_health_percent": 0.0,
+  "player_stamina_percent": 0.0,
+  "abilities": {},
+  "token_history": [
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556819.8832865,
+      "metadata": {
+        "domain": "player",
+        "location": "Deep Forest",
+        "previous_location": "Town Square"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556819.8832865,
+      "metadata": {
+        "domain": "player",
+        "state_type": "health",
+        "value": 1.0,
+        "category": "healthy"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556819.8832865,
+      "metadata": {
+        "domain": "player",
+        "state_type": "stamina",
+        "value": 0.95,
+        "category": "fresh"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556819.8833632,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "heart_rate",
+        "value": 73,
+        "category": "normal",
+        "unit": "bpm"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556819.8833632,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "ambient_noise",
+        "value": 42,
+        "category": "moderate",
+        "unit": "dB"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556819.8833632,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "focus_level",
+        "value": 0.7962567402257469,
+        "category": "focused",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556819.8834364,
+      "metadata": {
+        "domain": "environmental",
+        "condition_type": "weather",
+        "value": "Clear",
+        "intensity": "calm"
+      }
+    },
+    {
+      "type": "TIME_OF_DAY",
+      "timestamp_s": 1756556819.8834364,
+      "metadata": {
+        "domain": "environmental",
+        "time_period": "Evening",
+        "phase": "dusk"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556819.8834364,
+      "metadata": {
+        "domain": "environmental",
+        "location": "Deep Forest",
+        "context": "wilderness",
+        "danger_level": "high",
+        "entity_count": 2
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556819.8834364,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Goblin",
+        "entity_type": "hostile",
+        "threat_level": "moderate"
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556819.8834364,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Wolf",
+        "entity_type": "hostile",
+        "threat_level": "high"
+      }
+    },
+    {
+      "type": "SOCIAL_CONTEXT",
+      "timestamp_s": 1756556819.8835359,
+      "metadata": {
+        "domain": "social",
+        "context_type": "socially_unknown",
+        "description": "No established relationships",
+        "factors": [
+          "new_environment",
+          "no_relationships"
+        ]
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556819.8836143,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_duration",
+        "value": 0.001491546630859375,
+        "category": "brief",
+        "unit": "seconds"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556819.8836143,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "turn_progression",
+        "current_turn": 0,
+        "pace": 0.0,
+        "pace_category": "very_slow"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556819.8836143,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "action_frequency",
+        "actions_total": 1,
+        "rate_per_minute": 40226.70076726343,
+        "activity_level": "frantic"
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556819.8836143,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_phase",
+        "phase": "warmup",
+        "phase_characteristics": [
+          "getting_oriented",
+          "learning_controls",
+          "tentative"
+        ]
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556819.8836951,
+      "metadata": {
+        "domain": "player_action",
+        "action": "TRAVEL",
+        "raw_command": "travel"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556819.9852774,
+      "metadata": {
+        "domain": "player",
+        "location": "Deep Forest",
+        "previous_location": "Town Square"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556819.9852774,
+      "metadata": {
+        "domain": "player",
+        "state_type": "health",
+        "value": 0.8447125837417624,
+        "category": "healthy"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556819.9852774,
+      "metadata": {
+        "domain": "player",
+        "state_type": "stamina",
+        "value": 0.7999999999999999,
+        "category": "fresh"
+      }
+    },
+    {
+      "type": "COMBAT_STATE",
+      "timestamp_s": 1756556819.9852774,
+      "metadata": {
+        "domain": "player",
+        "in_combat": true,
+        "health_percent": 0.8447125837417624,
+        "stamina_percent": 0.7999999999999999
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556819.9852774,
+      "metadata": {
+        "domain": "player",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556819.9853568,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "heart_rate",
+        "value": 70,
+        "category": "normal",
+        "unit": "bpm"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556819.9853568,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "ambient_noise",
+        "value": 34,
+        "category": "moderate",
+        "unit": "dB"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556819.9853568,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "focus_level",
+        "value": 0.8344733673683621,
+        "category": "highly_focused",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556819.9853568,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "stress_level",
+        "value": 0.09624421466696265,
+        "category": "calm",
+        "context": "combat",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556819.985436,
+      "metadata": {
+        "domain": "environmental",
+        "condition_type": "weather",
+        "value": "Clear",
+        "intensity": "calm"
+      }
+    },
+    {
+      "type": "TIME_OF_DAY",
+      "timestamp_s": 1756556819.985436,
+      "metadata": {
+        "domain": "environmental",
+        "time_period": "Evening",
+        "phase": "dusk"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556819.985436,
+      "metadata": {
+        "domain": "environmental",
+        "location": "Deep Forest",
+        "context": "wilderness",
+        "danger_level": "high",
+        "entity_count": 2
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556819.985436,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Goblin",
+        "entity_type": "hostile",
+        "threat_level": "moderate"
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556819.985436,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Wolf",
+        "entity_type": "hostile",
+        "threat_level": "high"
+      }
+    },
+    {
+      "type": "SOCIAL_CONTEXT",
+      "timestamp_s": 1756556819.9855895,
+      "metadata": {
+        "domain": "social",
+        "context_type": "socially_unknown",
+        "description": "No established relationships",
+        "factors": [
+          "new_environment",
+          "no_relationships"
+        ]
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556819.9857314,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_duration",
+        "value": 0.10360860824584961,
+        "category": "brief",
+        "unit": "seconds"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556819.9857314,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "turn_progression",
+        "current_turn": 1,
+        "pace": 579.0078617328944,
+        "pace_category": "very_fast"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556819.9857314,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "action_frequency",
+        "actions_total": 2,
+        "rate_per_minute": 1158.204921691987,
+        "activity_level": "frantic"
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556819.9857314,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_phase",
+        "phase": "warmup",
+        "phase_characteristics": [
+          "getting_oriented",
+          "learning_controls",
+          "tentative"
+        ]
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556819.985824,
+      "metadata": {
+        "domain": "player_action",
+        "action": "ATTACK",
+        "raw_command": "attack goblin quickly"
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556819.985824,
+      "metadata": {
+        "domain": "player_action",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.087861,
+      "metadata": {
+        "domain": "player",
+        "location": "Deep Forest",
+        "previous_location": "Town Square"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.087861,
+      "metadata": {
+        "domain": "player",
+        "state_type": "health",
+        "value": 0.7263022580720716,
+        "category": "injured"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.087861,
+      "metadata": {
+        "domain": "player",
+        "state_type": "stamina",
+        "value": 0.6499999999999999,
+        "category": "tired"
+      }
+    },
+    {
+      "type": "COMBAT_STATE",
+      "timestamp_s": 1756556820.087861,
+      "metadata": {
+        "domain": "player",
+        "in_combat": true,
+        "health_percent": 0.7263022580720716,
+        "stamina_percent": 0.6499999999999999
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.087861,
+      "metadata": {
+        "domain": "player",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.0879374,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "heart_rate",
+        "value": 94,
+        "category": "elevated",
+        "unit": "bpm"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.0879374,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "ambient_noise",
+        "value": 35,
+        "category": "moderate",
+        "unit": "dB"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.0879374,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "focus_level",
+        "value": 0.8021204494908598,
+        "category": "highly_focused",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.0879374,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "stress_level",
+        "value": 0.33347318773112056,
+        "category": "moderate_stress",
+        "context": "combat",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.0880187,
+      "metadata": {
+        "domain": "environmental",
+        "condition_type": "weather",
+        "value": "Clear",
+        "intensity": "calm"
+      }
+    },
+    {
+      "type": "TIME_OF_DAY",
+      "timestamp_s": 1756556820.0880187,
+      "metadata": {
+        "domain": "environmental",
+        "time_period": "Evening",
+        "phase": "dusk"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.0880187,
+      "metadata": {
+        "domain": "environmental",
+        "location": "Deep Forest",
+        "context": "wilderness",
+        "danger_level": "high",
+        "entity_count": 2
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.0880187,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Goblin",
+        "entity_type": "hostile",
+        "threat_level": "moderate"
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.0880187,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Wolf",
+        "entity_type": "hostile",
+        "threat_level": "high"
+      }
+    },
+    {
+      "type": "SOCIAL_CONTEXT",
+      "timestamp_s": 1756556820.0881135,
+      "metadata": {
+        "domain": "social",
+        "context_type": "socially_unknown",
+        "description": "No established relationships",
+        "factors": [
+          "new_environment",
+          "no_relationships"
+        ]
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.088186,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_duration",
+        "value": 0.20606327056884766,
+        "category": "brief",
+        "unit": "seconds"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.088186,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "turn_progression",
+        "current_turn": 2,
+        "pace": 582.3312619386727,
+        "pace_category": "very_fast"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.088186,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "action_frequency",
+        "actions_total": 3,
+        "rate_per_minute": 873.5181165624581,
+        "activity_level": "frantic"
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.088186,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_phase",
+        "phase": "warmup",
+        "phase_characteristics": [
+          "getting_oriented",
+          "learning_controls",
+          "tentative"
+        ]
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.0882583,
+      "metadata": {
+        "domain": "player_action",
+        "action": "ATTACK",
+        "raw_command": "attack goblin quickly"
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.0882583,
+      "metadata": {
+        "domain": "player_action",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.1902258,
+      "metadata": {
+        "domain": "player",
+        "location": "Deep Forest",
+        "previous_location": "Town Square"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.1902258,
+      "metadata": {
+        "domain": "player",
+        "state_type": "health",
+        "value": 0.6093603197274946,
+        "category": "injured"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.1902258,
+      "metadata": {
+        "domain": "player",
+        "state_type": "stamina",
+        "value": 0.4999999999999999,
+        "category": "tired"
+      }
+    },
+    {
+      "type": "COMBAT_STATE",
+      "timestamp_s": 1756556820.1902258,
+      "metadata": {
+        "domain": "player",
+        "in_combat": true,
+        "health_percent": 0.6093603197274946,
+        "stamina_percent": 0.4999999999999999
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.1902258,
+      "metadata": {
+        "domain": "player",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.1903024,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "heart_rate",
+        "value": 95,
+        "category": "elevated",
+        "unit": "bpm"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.1903024,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "ambient_noise",
+        "value": 30,
+        "category": "moderate",
+        "unit": "dB"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.1903024,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "focus_level",
+        "value": 0.8035266378105375,
+        "category": "highly_focused",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.1903024,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "stress_level",
+        "value": 0.37613391273859037,
+        "category": "moderate_stress",
+        "context": "combat",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.1903894,
+      "metadata": {
+        "domain": "environmental",
+        "condition_type": "weather",
+        "value": "Clear",
+        "intensity": "calm"
+      }
+    },
+    {
+      "type": "TIME_OF_DAY",
+      "timestamp_s": 1756556820.1903894,
+      "metadata": {
+        "domain": "environmental",
+        "time_period": "Evening",
+        "phase": "dusk"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.1903894,
+      "metadata": {
+        "domain": "environmental",
+        "location": "Deep Forest",
+        "context": "wilderness",
+        "danger_level": "high",
+        "entity_count": 2
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.1903894,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Goblin",
+        "entity_type": "hostile",
+        "threat_level": "moderate"
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.1903894,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Wolf",
+        "entity_type": "hostile",
+        "threat_level": "high"
+      }
+    },
+    {
+      "type": "SOCIAL_CONTEXT",
+      "timestamp_s": 1756556820.1908064,
+      "metadata": {
+        "domain": "social",
+        "context_type": "socially_unknown",
+        "description": "No established relationships",
+        "factors": [
+          "new_environment",
+          "no_relationships"
+        ]
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.190909,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_duration",
+        "value": 0.30878615379333496,
+        "category": "brief",
+        "unit": "seconds"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.190909,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "turn_progression",
+        "current_turn": 3,
+        "pace": 582.9105893307577,
+        "pace_category": "very_fast"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.190909,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "action_frequency",
+        "actions_total": 4,
+        "rate_per_minute": 777.2369228726094,
+        "activity_level": "frantic"
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.190909,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_phase",
+        "phase": "warmup",
+        "phase_characteristics": [
+          "getting_oriented",
+          "learning_controls",
+          "tentative"
+        ]
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.1910195,
+      "metadata": {
+        "domain": "player_action",
+        "action": "ATTACK",
+        "raw_command": "attack goblin quickly"
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.1910195,
+      "metadata": {
+        "domain": "player_action",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.2930605,
+      "metadata": {
+        "domain": "player",
+        "location": "Deep Forest",
+        "previous_location": "Town Square"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.2930605,
+      "metadata": {
+        "domain": "player",
+        "state_type": "health",
+        "value": 0.4102327020897347,
+        "category": "badly_hurt"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.2930605,
+      "metadata": {
+        "domain": "player",
+        "state_type": "stamina",
+        "value": 0.34999999999999987,
+        "category": "exhausted"
+      }
+    },
+    {
+      "type": "COMBAT_STATE",
+      "timestamp_s": 1756556820.2930605,
+      "metadata": {
+        "domain": "player",
+        "in_combat": true,
+        "health_percent": 0.4102327020897347,
+        "stamina_percent": 0.34999999999999987
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.2930605,
+      "metadata": {
+        "domain": "player",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.2931495,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "heart_rate",
+        "value": 104,
+        "category": "high",
+        "unit": "bpm"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.2931495,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "ambient_noise",
+        "value": 32,
+        "category": "moderate",
+        "unit": "dB"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.2931495,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "focus_level",
+        "value": 0.7904678830968039,
+        "category": "focused",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.2931495,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "stress_level",
+        "value": 0.5117898244440384,
+        "category": "moderate_stress",
+        "context": "combat",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.2932293,
+      "metadata": {
+        "domain": "environmental",
+        "condition_type": "weather",
+        "value": "Clear",
+        "intensity": "calm"
+      }
+    },
+    {
+      "type": "TIME_OF_DAY",
+      "timestamp_s": 1756556820.2932293,
+      "metadata": {
+        "domain": "environmental",
+        "time_period": "Evening",
+        "phase": "dusk"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.2932293,
+      "metadata": {
+        "domain": "environmental",
+        "location": "Deep Forest",
+        "context": "wilderness",
+        "danger_level": "high",
+        "entity_count": 2
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.2932293,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Goblin",
+        "entity_type": "hostile",
+        "threat_level": "moderate"
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.2932293,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Wolf",
+        "entity_type": "hostile",
+        "threat_level": "high"
+      }
+    },
+    {
+      "type": "SOCIAL_CONTEXT",
+      "timestamp_s": 1756556820.2933187,
+      "metadata": {
+        "domain": "social",
+        "context_type": "socially_unknown",
+        "description": "No established relationships",
+        "factors": [
+          "new_environment",
+          "no_relationships"
+        ]
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.2933924,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_duration",
+        "value": 0.4112696647644043,
+        "category": "brief",
+        "unit": "seconds"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.2933924,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "turn_progression",
+        "current_turn": 4,
+        "pace": 583.5519562205436,
+        "pace_category": "very_fast"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.2933924,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "action_frequency",
+        "actions_total": 5,
+        "rate_per_minute": 729.4484025994354,
+        "activity_level": "frantic"
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.2933924,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_phase",
+        "phase": "warmup",
+        "phase_characteristics": [
+          "getting_oriented",
+          "learning_controls",
+          "tentative"
+        ]
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.293472,
+      "metadata": {
+        "domain": "player_action",
+        "action": "ATTACK",
+        "raw_command": "attack goblin quickly"
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.293472,
+      "metadata": {
+        "domain": "player_action",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.395165,
+      "metadata": {
+        "domain": "player",
+        "location": "Deep Forest",
+        "previous_location": "Town Square"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.395165,
+      "metadata": {
+        "domain": "player",
+        "state_type": "health",
+        "value": 0.1828744341320321,
+        "category": "critical"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.395165,
+      "metadata": {
+        "domain": "player",
+        "state_type": "stamina",
+        "value": 0.19999999999999987,
+        "category": "depleted"
+      }
+    },
+    {
+      "type": "COMBAT_STATE",
+      "timestamp_s": 1756556820.395165,
+      "metadata": {
+        "domain": "player",
+        "in_combat": true,
+        "health_percent": 0.1828744341320321,
+        "stamina_percent": 0.19999999999999987
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.395165,
+      "metadata": {
+        "domain": "player",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.3952384,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "heart_rate",
+        "value": 110,
+        "category": "high",
+        "unit": "bpm"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.3952384,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "ambient_noise",
+        "value": 21,
+        "category": "quiet",
+        "unit": "dB"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.3952384,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "focus_level",
+        "value": 0.4310470130884482,
+        "category": "distracted",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.3952384,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "stress_level",
+        "value": 0.7358235658338559,
+        "category": "high_stress",
+        "context": "combat",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.39531,
+      "metadata": {
+        "domain": "environmental",
+        "condition_type": "weather",
+        "value": "Clear",
+        "intensity": "calm"
+      }
+    },
+    {
+      "type": "TIME_OF_DAY",
+      "timestamp_s": 1756556820.39531,
+      "metadata": {
+        "domain": "environmental",
+        "time_period": "Evening",
+        "phase": "dusk"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.39531,
+      "metadata": {
+        "domain": "environmental",
+        "location": "Deep Forest",
+        "context": "wilderness",
+        "danger_level": "high",
+        "entity_count": 2
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.39531,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Goblin",
+        "entity_type": "hostile",
+        "threat_level": "moderate"
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.39531,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Wolf",
+        "entity_type": "hostile",
+        "threat_level": "high"
+      }
+    },
+    {
+      "type": "SOCIAL_CONTEXT",
+      "timestamp_s": 1756556820.395403,
+      "metadata": {
+        "domain": "social",
+        "context_type": "socially_unknown",
+        "description": "No established relationships",
+        "factors": [
+          "new_environment",
+          "no_relationships"
+        ]
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.3954775,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_duration",
+        "value": 0.5133547782897949,
+        "category": "brief",
+        "unit": "seconds"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.3954775,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "turn_progression",
+        "current_turn": 5,
+        "pace": 584.3854713965857,
+        "pace_category": "very_fast"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.3954775,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "action_frequency",
+        "actions_total": 6,
+        "rate_per_minute": 701.2694051457249,
+        "activity_level": "frantic"
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.3954775,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_phase",
+        "phase": "warmup",
+        "phase_characteristics": [
+          "getting_oriented",
+          "learning_controls",
+          "tentative"
+        ]
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.3955495,
+      "metadata": {
+        "domain": "player_action",
+        "action": "ATTACK",
+        "raw_command": "attack goblin quickly"
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.3955495,
+      "metadata": {
+        "domain": "player_action",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.4972937,
+      "metadata": {
+        "domain": "player",
+        "location": "Deep Forest",
+        "previous_location": "Town Square"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.4972937,
+      "metadata": {
+        "domain": "player",
+        "state_type": "health",
+        "value": 0.022324335813921015,
+        "category": "critical"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.4972937,
+      "metadata": {
+        "domain": "player",
+        "state_type": "stamina",
+        "value": 0.04999999999999985,
+        "category": "depleted"
+      }
+    },
+    {
+      "type": "COMBAT_STATE",
+      "timestamp_s": 1756556820.4972937,
+      "metadata": {
+        "domain": "player",
+        "in_combat": true,
+        "health_percent": 0.022324335813921015,
+        "stamina_percent": 0.04999999999999985
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.4972937,
+      "metadata": {
+        "domain": "player",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.4973927,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "heart_rate",
+        "value": 114,
+        "category": "high",
+        "unit": "bpm"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.4973927,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "ambient_noise",
+        "value": 34,
+        "category": "moderate",
+        "unit": "dB"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.4973927,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "focus_level",
+        "value": 0.3941923534474259,
+        "category": "unfocused",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.4973927,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "stress_level",
+        "value": 0.827044993221596,
+        "category": "extreme_stress",
+        "context": "combat",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.4975247,
+      "metadata": {
+        "domain": "environmental",
+        "condition_type": "weather",
+        "value": "Clear",
+        "intensity": "calm"
+      }
+    },
+    {
+      "type": "TIME_OF_DAY",
+      "timestamp_s": 1756556820.4975247,
+      "metadata": {
+        "domain": "environmental",
+        "time_period": "Evening",
+        "phase": "dusk"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.4975247,
+      "metadata": {
+        "domain": "environmental",
+        "location": "Deep Forest",
+        "context": "wilderness",
+        "danger_level": "high",
+        "entity_count": 2
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.4975247,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Goblin",
+        "entity_type": "hostile",
+        "threat_level": "moderate"
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.4975247,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Wolf",
+        "entity_type": "hostile",
+        "threat_level": "high"
+      }
+    },
+    {
+      "type": "SOCIAL_CONTEXT",
+      "timestamp_s": 1756556820.497669,
+      "metadata": {
+        "domain": "social",
+        "context_type": "socially_unknown",
+        "description": "No established relationships",
+        "factors": [
+          "new_environment",
+          "no_relationships"
+        ]
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.497763,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_duration",
+        "value": 0.6156401634216309,
+        "category": "brief",
+        "unit": "seconds"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.497763,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "turn_progression",
+        "current_turn": 6,
+        "pace": 584.7524148953432,
+        "pace_category": "very_fast"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.497763,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "action_frequency",
+        "actions_total": 7,
+        "rate_per_minute": 682.2166989003873,
+        "activity_level": "frantic"
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.497763,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_phase",
+        "phase": "warmup",
+        "phase_characteristics": [
+          "getting_oriented",
+          "learning_controls",
+          "tentative"
+        ]
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.4978404,
+      "metadata": {
+        "domain": "player_action",
+        "action": "ATTACK",
+        "raw_command": "attack goblin quickly"
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.4978404,
+      "metadata": {
+        "domain": "player_action",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.5997555,
+      "metadata": {
+        "domain": "player",
+        "location": "Deep Forest",
+        "previous_location": "Town Square"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.5997555,
+      "metadata": {
+        "domain": "player",
+        "state_type": "health",
+        "value": 0.0,
+        "category": "critical"
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.5997555,
+      "metadata": {
+        "domain": "player",
+        "state_type": "stamina",
+        "value": 0.0,
+        "category": "depleted"
+      }
+    },
+    {
+      "type": "COMBAT_STATE",
+      "timestamp_s": 1756556820.5997555,
+      "metadata": {
+        "domain": "player",
+        "in_combat": true,
+        "health_percent": 0.0,
+        "stamina_percent": 0.0
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.5997555,
+      "metadata": {
+        "domain": "player",
+        "modifier": "QUICK"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.5998278,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "heart_rate",
+        "value": 119,
+        "category": "high",
+        "unit": "bpm"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.5998278,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "ambient_noise",
+        "value": 35,
+        "category": "moderate",
+        "unit": "dB"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.5998278,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "focus_level",
+        "value": 0.42369102121912755,
+        "category": "distracted",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "BIOMETRIC",
+      "timestamp_s": 1756556820.5998278,
+      "metadata": {
+        "domain": "biometric",
+        "sensor_type": "stress_level",
+        "value": 0.8648926936342618,
+        "category": "extreme_stress",
+        "context": "combat",
+        "unit": "normalized"
+      }
+    },
+    {
+      "type": "ENVIRONMENTAL",
+      "timestamp_s": 1756556820.5998976,
+      "metadata": {
+        "domain": "environmental",
+        "condition_type": "weather",
+        "value": "Clear",
+        "intensity": "calm"
+      }
+    },
+    {
+      "type": "TIME_OF_DAY",
+      "timestamp_s": 1756556820.5998976,
+      "metadata": {
+        "domain": "environmental",
+        "time_period": "Evening",
+        "phase": "dusk"
+      }
+    },
+    {
+      "type": "LOCATION",
+      "timestamp_s": 1756556820.5998976,
+      "metadata": {
+        "domain": "environmental",
+        "location": "Deep Forest",
+        "context": "wilderness",
+        "danger_level": "high",
+        "entity_count": 2
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.5998976,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Goblin",
+        "entity_type": "hostile",
+        "threat_level": "moderate"
+      }
+    },
+    {
+      "type": "ENTITY_PRESENCE",
+      "timestamp_s": 1756556820.5998976,
+      "metadata": {
+        "domain": "environmental",
+        "entity_name": "Wolf",
+        "entity_type": "hostile",
+        "threat_level": "high"
+      }
+    },
+    {
+      "type": "SOCIAL_CONTEXT",
+      "timestamp_s": 1756556820.5999846,
+      "metadata": {
+        "domain": "social",
+        "context_type": "socially_unknown",
+        "description": "No established relationships",
+        "factors": [
+          "new_environment",
+          "no_relationships"
+        ]
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.600057,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_duration",
+        "value": 0.7179341316223145,
+        "category": "brief",
+        "unit": "seconds"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.600057,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "turn_progression",
+        "current_turn": 7,
+        "pace": 585.0079999893732,
+        "pace_category": "very_fast"
+      }
+    },
+    {
+      "type": "TEMPORAL_PATTERN",
+      "timestamp_s": 1756556820.600057,
+      "metadata": {
+        "domain": "temporal",
+        "pattern_type": "action_frequency",
+        "actions_total": 8,
+        "rate_per_minute": 668.5850119917616,
+        "activity_level": "frantic"
+      }
+    },
+    {
+      "type": "SESSION_STATE",
+      "timestamp_s": 1756556820.600057,
+      "metadata": {
+        "domain": "temporal",
+        "state_type": "session_phase",
+        "phase": "warmup",
+        "phase_characteristics": [
+          "getting_oriented",
+          "learning_controls",
+          "tentative"
+        ]
+      }
+    },
+    {
+      "type": "PLAYER_STATE",
+      "timestamp_s": 1756556820.6001277,
+      "metadata": {
+        "domain": "player_action",
+        "action": "ATTACK",
+        "raw_command": "attack goblin quickly"
+      }
+    },
+    {
+      "type": "ACTION_MODIFIER",
+      "timestamp_s": 1756556820.6001277,
+      "metadata": {
+        "domain": "player_action",
+        "modifier": "QUICK"
+      }
+    }
+  ]
+}

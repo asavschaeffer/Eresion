@@ -2,7 +2,7 @@ import json
 import os
 import random
 from typing import Optional
-from game_state import GameState
+from .game_state import GameState
 from interfaces import Token, AssembledAbility, AbilityPrimitive, TriggerCondition
 
 def random_player_style() -> str:

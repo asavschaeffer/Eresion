@@ -118,6 +118,51 @@ class ITokenizer(ABC):
         """Processes a single raw event from the game engine."""
         pass
 
+class IStreamProcessor(ABC):
+    """
+    Contract for processing specific data streams into tokens.
+    
+    Each processor is responsible for one domain of data (player actions,
+    biometrics, environment, etc.) and converts GameState into domain-specific tokens.
+    
+    This interface enforces the Strategy pattern: tokenizers configure themselves
+    with a list of active processors based on configuration.
+    """
+    
+    @abstractmethod
+    def get_domain(self) -> str:
+        """Returns the domain name for tokens produced by this processor."""
+        pass
+    
+    @abstractmethod
+    def process(self, game_state) -> List[Token]:
+        """
+        Process the current game state and return relevant tokens.
+        
+        This method should be pure: it reads from game_state but never
+        mutates it. All simulation/mutation logic belongs in WorldSimulator.
+        
+        Args:
+            game_state: Current GameState object
+            
+        Returns:
+            List of tokens with domain metadata set appropriately
+        """
+        pass
+    
+    @abstractmethod
+    def is_enabled(self, config) -> bool:
+        """
+        Check if this processor should be active based on configuration.
+        
+        Args:
+            config: Configuration object with stream settings
+            
+        Returns:
+            True if this processor should be active
+        """
+        pass
+
 class INeuronalGraph(ABC):
     """Contract for the "Fast Thinking" module; the system's working memory."""
     @abstractmethod
