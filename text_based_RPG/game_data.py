@@ -150,7 +150,7 @@ def create_entity(entity_type: str, name: str = None) -> Entity:
         name=entity_name,
         is_hostile=stats["is_hostile"],
         is_alive=stats["is_alive"],
-        metadata=stats
+        stats=stats
     )
 
 def get_location_entities(location: str) -> list:
@@ -159,5 +159,5 @@ def get_location_entities(location: str) -> list:
 
 def get_entity_behavior(entity: Entity) -> dict:
     """Get behavior pattern for an entity based on its behavior_type."""
-    behavior_type = entity.metadata.get("behavior_type", "neutral")
+    behavior_type = entity.stats.get("behavior_type", "neutral")
     return BEHAVIOR_PATTERNS.get(behavior_type, BEHAVIOR_PATTERNS["neutral"])

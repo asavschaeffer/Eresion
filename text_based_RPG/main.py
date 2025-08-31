@@ -145,7 +145,7 @@ class ComponentTimer:
 
 def process_turn(game_state: GameState, eresion: EresionCore, hud: StatusHUD, menu: ActionMenu, 
                  world_simulator: WorldSimulator, tokenizer: ModularTokenizer, 
-                 action_dispatcher, event_system, performance_monitor, sim_mode: bool):
+                 action_dispatcher, event_system, sim_mode: bool, performance_monitor):
     """
     Refactored turn processing following Input → Parse → Dispatch → Mutate → Tokenize flow.
     
@@ -156,37 +156,47 @@ def process_turn(game_state: GameState, eresion: EresionCore, hud: StatusHUD, me
     4. Mutate - Apply state changes through world simulator
     5. Tokenize - Generate tokens from results
     """
-    with performance_monitor.time_component("total_turn"):
+    # Phase 5: Performance monitoring (if enabled)
+    if performance_monitor:
+        timer_context = performance_monitor.time_component("total_turn")
+        timer_context.__enter__()
+    else:
+        timer_context = None
+    
+    try:
         print(f"\n--- Turn {game_state.temporal.turn} ---")
         
         # 1. Update world state (all mutations happen here)
         world_simulator.update(game_state)
     
-    # Ensure entities are initialized
-    if not game_state.environment.entity_map:
-        game_state.initialize_default_entities()
+        # Ensure entities are initialized
+        if not game_state.environment.entity_map:
+            game_state.initialize_default_entities()
     
-    # 2. Display current state
-    hud.display(game_state)
-    menu.display(game_state)
+        # 2. Display current state
+        hud.display(game_state)
+        menu.display(game_state)
 
-    # 3. INPUT - Get player input (simulated or real)
-    if sim_mode:
-        player_input = _get_simulated_input(game_state)
-        print(f"> {player_input}")
-    else:
-        player_input = input("> ").strip().lower()
-        if player_input == "quit":
-            return "QUIT"
-            
-        if not player_input:
-            return "CONTINUE"
+        # 3. INPUT - Get player input (simulated or real)
+        if sim_mode:
+            player_input = _get_simulated_input(game_state)
+            print(f"> {player_input}")
+        else:
+            player_input = input("> ").strip().lower()
+            if player_input == "quit":
+                return "QUIT"
+                
+            if not player_input:
+                return "CONTINUE"
 
         # 4. PARSE - Structure the input
         parsed_input = _parse_input(player_input)
         
         # 5. DISPATCH - Route to appropriate handler (timed)
-        with performance_monitor.time_component("action_dispatch"):
+        if performance_monitor:
+            with performance_monitor.time_component("action_dispatch"):
+                outcome = action_dispatcher.dispatch(parsed_input, game_state, game_state.environment.entity_map)
+        else:
             outcome = action_dispatcher.dispatch(parsed_input, game_state, game_state.environment.entity_map)
         
         # 6. MUTATE - Apply state changes through world simulator
@@ -202,7 +212,16 @@ def process_turn(game_state: GameState, eresion: EresionCore, hud: StatusHUD, me
             print(outcome.message)
 
         # 7. TOKENIZE - Create snapshot and tokenize (timed)
-        with performance_monitor.time_component("tokenization"):
+        if performance_monitor:
+            with performance_monitor.time_component("tokenization"):
+                snapshot = WorldStateSnapshot(
+                    game_state=game_state,
+                    discrete_events=[{"type": "PLAYER_COMMAND", "command": player_input}]
+                )
+                
+                token_batch = tokenizer.process_world_state(snapshot)
+                eresion.process_token_batch(token_batch)
+        else:
             snapshot = WorldStateSnapshot(
                 game_state=game_state,
                 discrete_events=[{"type": "PLAYER_COMMAND", "command": player_input}]
@@ -219,17 +238,13 @@ def process_turn(game_state: GameState, eresion: EresionCore, hud: StatusHUD, me
         game_state.player.stamina_percent = max(0.0, game_state.player.stamina_percent - natural_decay)
         
         game_state.player.decay_buffs()  # New buff system
+        
+        return "CONTINUE"
     
-    # 8. Apply turn-based effects
-    game_state.temporal.turn += 1
-    
-    # Small natural stamina decay (now that REST is available for recovery)
-    natural_decay = 0.02  # Reduced from 0.05 since REST handles recovery
-    game_state.player.stamina_percent = max(0.0, game_state.player.stamina_percent - natural_decay)
-    
-    game_state.player.decay_buffs()  # New buff system
-    
-    return "CONTINUE"
+    finally:
+        # Cleanup performance monitoring context
+        if timer_context:
+            timer_context.__exit__(None, None, None)
 
 def _parse_input(raw_input: str) -> ParsedInput:
     """
@@ -573,7 +588,7 @@ async def run_game(sim_mode=False):
     world_simulator = WorldSimulator(config)
     tokenizer = ModularTokenizer(config)
     
-    # Phase 1 additions: Dispatcher and Event System
+    # Dispatcher and Event System
     event_system = EventSystem()
     resolver = SimpleResolver(config)
     action_dispatcher = ActionDispatcher(resolver, event_system)
@@ -603,7 +618,7 @@ async def run_game(sim_mode=False):
     hud = StatusHUD()
     action_menu = ActionMenu()
     
-    # Phase 5: Performance monitoring
+    # Performance monitoring
     performance_monitor = None
     if config.debug_performance:
         performance_monitor = PerformanceMonitor()
@@ -613,7 +628,6 @@ async def run_game(sim_mode=False):
     print("Repeat styles to unlock abilities. Type 'quit' to save and exit.")
     print(f"Simulation mode: {'ON' if sim_mode else 'OFF'}")
 
-    # 4. Clean main game loop
     while game_state.player.health_percent > 0 and game_state.temporal.turn < 1000:
         # Check for new session (location-based trigger)
         if (game_state.player.location == "Town Square" and 
@@ -630,30 +644,28 @@ async def run_game(sim_mode=False):
             break
 
         # Async pattern analysis (SlowThinking)
-        await eresion.update()
+        ability_was_unlocked = await eresion.update()
         
         # Simulation pacing
         if sim_mode: 
             time.sleep(0.1)
+            if ability_was_unlocked:
+                print("\n[SIMULATION] Ability crystallized! Ending session.")
+                break
 
     # 5. Game end and validation
     print("\n--- Game Over ---")
     print(f"Final stats: Health: {game_state.player.health_percent:.1%}, "
           f"Turns: {game_state.temporal.turn}, Abilities: {len(game_state.player.abilities)}")
     
-    # Phase 5: Performance report
-    if performance_monitor:
-        print("\n--- PERFORMANCE REPORT ---")
-        performance_monitor.print_report()
-    
+    # In text_based_RPG/main.py, at the end of run_game:
+    from visualizer import visualize_graph # Add this import
+
     print("\n--- FINAL NEURONAL GRAPH STATE ---")
-    if not eresion.neuronal_graph.graph:
-        print("Graph is empty.")
-    else:
-        import json
-        # Pretty print the graph
-        printable_graph = {k: {k2: v2 for k2, v2 in v.items()} for k, v in eresion.neuronal_graph.graph.items()}
-        print(json.dumps(printable_graph, indent=2))
+
+    if config.save_graph_visualization:
+        output_file = "graph_visualization.png"
+        visualize_graph(eresion.neuronal_graph, output_file)
 
     print("------------------------------------")
 

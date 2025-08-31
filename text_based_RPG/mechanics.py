@@ -819,7 +819,7 @@ def talk_handler(parsed_input: ParsedInput, game_state: GameState, entity_map: D
     
     # Behavior-specific responses
     dialogue_topics = behavior.get("dialogue_topics", ["general"])
-    behavior_type = target_entity.metadata.get("behavior_type", "neutral")
+    behavior_type = target_entity.stats.get("behavior_type", "neutral")
     
     if behavior_type == "friendly":
         relationship_change = base_change + modifier_bonus + 0.1  # Friendly NPCs like talking
@@ -835,7 +835,7 @@ def talk_handler(parsed_input: ParsedInput, game_state: GameState, entity_map: D
         response_mood = "cautious"
     
     # Get current relationship score
-    current_relationship = target_entity.metadata.get("relationship_score", 0)
+    current_relationship = target_entity.stats.get("relationship_score", 0)
     new_relationship = current_relationship + relationship_change
     
     # Generate contextual dialogue
@@ -872,8 +872,8 @@ def talk_handler(parsed_input: ParsedInput, game_state: GameState, entity_map: D
     else:
         consequences.append(f"The {target_entity.name} seems to dislike you.")
     
-    # Update entity relationship score in metadata
-    target_entity.metadata["relationship_score"] = new_relationship
+    # Update entity relationship score in stats
+    target_entity.stats["relationship_score"] = new_relationship
     
     # Update social state if it exists
     if hasattr(game_state, 'social') and hasattr(game_state.social, 'npc_relationships'):

@@ -45,6 +45,7 @@ class Config:
     debug_pattern_detection: bool = False
     debug_ability_generation: bool = False
     debug_performance: bool = False
+    save_graph_visualization: bool = True
 
 def load_config(config_path: Optional[str] = None) -> Config:
     """
