@@ -44,6 +44,7 @@ class Config:
     debug_tokenization: bool = False
     debug_pattern_detection: bool = False
     debug_ability_generation: bool = False
+    debug_performance: bool = False
 
 def load_config(config_path: Optional[str] = None) -> Config:
     """

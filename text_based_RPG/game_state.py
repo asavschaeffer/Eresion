@@ -4,6 +4,13 @@ from typing import List, Literal, Dict, Any, Optional
 from interfaces import Token, AssembledAbility  # Import schemas
 
 @dataclass
+class PlayerBuff:
+    """Represents temporary player buffs/debuffs."""
+    name: str
+    duration_turns: int
+    effects: Dict[str, float] = field(default_factory=dict)
+    
+@dataclass
 class PlayerState:
     """Core player character state."""
     location: str = "Town Square"
@@ -13,6 +20,27 @@ class PlayerState:
     in_combat: bool = False
     action_modifier: Optional[Literal["QUICK", "CAUTIOUS"]] = None
     abilities: Dict[str, AssembledAbility] = field(default_factory=dict)
+    
+    # Buff system for Phase 2
+    active_buffs: List[PlayerBuff] = field(default_factory=list)
+    
+    def add_buff(self, buff: PlayerBuff):
+        """Add a buff, replacing any existing buff with the same name."""
+        self.active_buffs = [b for b in self.active_buffs if b.name != buff.name]
+        self.active_buffs.append(buff)
+    
+    def get_buff_effect(self, effect_name: str) -> float:
+        """Get the total effect of all active buffs for a specific effect."""
+        total_effect = 0.0
+        for buff in self.active_buffs:
+            total_effect += buff.effects.get(effect_name, 0.0)
+        return total_effect
+    
+    def decay_buffs(self):
+        """Reduce buff durations and remove expired buffs."""
+        for buff in self.active_buffs:
+            buff.duration_turns -= 1
+        self.active_buffs = [b for b in self.active_buffs if b.duration_turns > 0]
 
 @dataclass
 class EnvironmentalState:
@@ -20,7 +48,17 @@ class EnvironmentalState:
     time_of_day: Literal["Morning", "Afternoon", "Evening", "Night"] = "Afternoon"
     weather: Literal["Clear", "Overcast", "Rain"] = "Clear"
     active_world_events: List[str] = field(default_factory=list)
-    nearby_entities: List[str] = field(default_factory=lambda: ["Grumpy Blacksmith", "Town Guard"])
+    nearby_entities: List[str] = field(default_factory=lambda: ["Grumpy Blacksmith", "Town Guard"])  # Legacy support
+    
+    # Entity system for Phase 1/2 - will gradually replace nearby_entities
+    entity_map: Dict[str, 'Entity'] = field(default_factory=dict)
+    
+    def get_entities_by_type(self, hostile: bool = None) -> List['Entity']:
+        """Get entities filtered by type."""
+        entities = list(self.entity_map.values())
+        if hostile is not None:
+            entities = [e for e in entities if e.is_hostile == hostile]
+        return entities
 
 @dataclass
 class BiometricState:
@@ -61,6 +99,32 @@ class GameState:
     
     # System-level data
     token_history: List[Token] = field(default_factory=list)  # For persistence
+    
+    def initialize_default_entities(self):
+        """Initialize default entities for the game world using data-driven approach."""
+        # Import here to avoid circular dependency
+        from .game_data import create_entity, get_location_entities
+        import random
+        
+        # Get possible entities for current location
+        possible_entities = get_location_entities(self.player.location)
+        
+        if possible_entities:
+            # Create 1-2 entities randomly from the location's spawn table
+            num_entities = random.randint(1, min(2, len(possible_entities)))
+            selected_types = random.sample(possible_entities, num_entities)
+            
+            self.environment.entity_map = {}
+            for entity_type in selected_types:
+                entity_instance = create_entity(entity_type)
+                # Use lowercase key for consistency with existing code
+                self.environment.entity_map[entity_type] = entity_instance
+        else:
+            # Fallback for unknown locations
+            self.environment.entity_map = {}
+        
+        # Keep legacy list in sync for compatibility
+        self.environment.nearby_entities = [entity.name for entity in self.environment.entity_map.values()]
     
     # Backward compatibility properties
     @property
