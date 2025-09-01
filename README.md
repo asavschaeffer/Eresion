@@ -179,58 +179,48 @@ Inspired by Kahneman's dual-process theory:
 
 ## System Architecture
 
-### Dual-Pipeline Data Flow (Version 2.0)
+### Head-Bridge-Core Architecture (Version 3.0)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                              INPUT LAYER                             │
-│     D&D Actions | Game State | Environment | Mock Biometrics         │
-└─────────────────────────┬───────────────────────────────────────────┘
-                          ▼
+│                          GAME HEAD LAYER                            │
+│                      (Game-Specific Logic)                        │
+│                                                                     │
+│    D&D Game Engine • Action System • State Management • UI          │
+└─────────────────────────────────┬───────────────────────────────────┘
+                                 ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      DUAL TOKENIZATION LAYER                        │
+│                        BRIDGE LAYER                                 │
+│                    (Translation Interface)                         │
+│                                                                     │
+│     TextRPGBridge • IGameBridge • State Standardization           │
+└─────────────────────────────────┬───────────────────────────────────┘
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      HEADLESS CORE LAYER                           │
+│                   (Universal Pattern Engine)                       │
 │                                                                     │
 │  ┌─────────────────────┐         ┌─────────────────────────────────┐ │
-│  │   ACTION PIPELINE   │         │        STATE PIPELINE           │ │
+│  │   TOKENIZATION    │         │        PATTERN DETECTION        │ │
 │  │                     │         │                                 │ │
-│  │ • D&D Action Tokens │         │ • StreamlinedTokenizer          │ │
-│  │ • Behavioral Sigs   │         │ • Biometric Processor          │ │
-│  │ • Combat Analytics  │         │ • Environmental Processor      │ │
-│  │ • Session Metrics   │         │ • Social/Temporal Processors   │ │
+│  │ • StreamlinedTokenizer │         │ • Temporal Graph              │ │
+│  │ • Stream Processors    │         │ • FastThinking (Real-time)    │ │
+│  │ • Multi-domain Tokens  │         │ • SlowThinking (Analysis)     │ │
+│  │ • Rich Metadata        │         │ • Motif Mining                │ │
 │  └──────────┬──────────┘         └─────────────┬───────────────────┘ │
 │             │                                  │                     │
 │             └──────────────┬──────────────────┘                     │
 └────────────────────────────┼──────────────────────────────────────────┘
                              ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        UNIFIED TOKEN STREAM                          │
-│        ~6-8 Rich Tokens Per Action (vs ~1-2 Previously)             │
-└─────────────────────────┬───────────────────────────────────────────┘
-                          ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      TEMPORAL GRAPH LAYER                           │
-│          Enhanced Pattern Detection with Richer Data                │
-└─────────────────────────┬───────────────────────────────────────────┘
-                          ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                     EMERGENCE LAYER                                 │
+│                       EMERGENCE LAYER                               │
+│                   (Abilities & Music Generation)                   │
 │                                                                     │
-│  ┌────────────────┐              ┌────────────────┐                │
-│  │  FastThinking  │              │  SlowThinking  │                │
-│  │                │              │                │                │
-│  │ • Real-time    │              │ • Motif Mining │                │
-│  │ • Musical      │              │ • Ability Gen  │                │
-│  │ • Response     │              │ • Evolution    │                │
-│  └───────┬────────┘              └────────┬───────┘                │
-└──────────┼─────────────────────────────────┼────────────────────────┘
-           ▼                                 ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        OUTPUT LAYER                                 │
-│                                                                     │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐              │
-│  │Music Engine │  │Ability Engine│  │ Progression  │              │
-│  │             │  │              │  │   Manager    │              │
-│  └─────────────┘  └──────────────┘  └──────────────┘              │
+│  ┌─────────────────┐  ┌────────────────┐  ┌───────────────┐              │
+│  │ Ability Engine   │  │  Music Engine  │  │ Progression   │              │
+│  │ • Crystallization │  │ • Real-time Gen │  │ • Evolution   │              │
+│  │ • Balancing      │  │ • Musical Rules│  │ • Adaptation  │              │
+│  └─────────────────┘  └────────────────┘  └───────────────┘              │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -603,6 +593,15 @@ def game_update():
 
 ### Current Code Organization (Version 3.0)
 
+**Key Architecture Pattern: Head-Bridge-Core**
+
+The system uses a clean separation where:
+- **Game Head** (`text_based_rpg/`) handles game-specific logic and UI
+- **Bridge** (`text_based_rpg/bridge.py`) translates game state to standard interface via `IGameBridge`
+- **Headless Core** (`eresion_core/`) provides universal pattern detection engine
+
+This architecture enables the core engine to work with any game type through the bridge interface, making the system truly modular and extensible.
+
 ```
 Eresion/
 ├── shared/                      # Shared contracts and data structures
@@ -625,6 +624,7 @@ Eresion/
 │
 ├── text_based_rpg/            # Game logic, interface, and testing
 │   ├── main.py               # Entry point and game orchestration
+│   ├── bridge.py             # Game state translation bridge (IGameBridge)
 │   ├── config.py             # Configuration management
 │   ├── ui.py                 # Text-based user interface
 │   ├── utils.py              # Save/load utilities
@@ -700,11 +700,12 @@ Eresion/
 4. **Performance**: Optimize token processing for higher throughput
 
 #### Key Files to Review First (Version 3.0):
-- `text_based_rpg/main.py` - System orchestration and game loop
+- `text_based_rpg/main.py` - System orchestration and Head-Bridge-Core integration
+- `text_based_rpg/bridge.py` - TextRPGBridge implementing IGameBridge interface
 - `eresion_core/core_engine.py` - Central pattern detection engine
 - `text_based_rpg/game_logic/actions.py` - D&D action system
 - `text_based_rpg/game_logic/integration.py` - Game engine integration
-- `shared/interfaces.py` - Core system contracts
+- `shared/interfaces.py` - Core system contracts (IGameBridge, ITokenizer, etc.)
 - `shared/data_structures.py` - Essential data classes
 - `text_based_rpg/testing/test_dnd_framework.py` - Framework validation
 

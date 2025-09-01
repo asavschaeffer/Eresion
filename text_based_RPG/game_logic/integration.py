@@ -33,7 +33,6 @@ class DnDGameEngine:
         self.context_factory = ActionContextFactory(game_state)
         self.action_context = self.context_factory.create_composite_context()
         self.dispatcher = DnDActionDispatcher(self.action_context)
-        self.tokenizer = StreamlinedTokenizer(config)
         self.data_loader = get_data_loader()
         
         # Performance tracking
@@ -60,11 +59,8 @@ class DnDGameEngine:
         # 3. Process player input through D&D action system
         outcome = self.dispatcher.dispatch_action(player_input)
         
-        # 4. Generate tokens from action and context
+        # 4. Get action tokens from outcome
         action_tokens = outcome.tokens_generated or []
-        context_tokens = self._generate_context_tokens()
-        
-        all_tokens = action_tokens + context_tokens
         
         # 5. Update game state with outcome
         if outcome.success and outcome.state_changes:
@@ -79,7 +75,7 @@ class DnDGameEngine:
         # 8. Build turn result
         turn_result = {
             'outcome': outcome,
-            'tokens_generated': all_tokens,
+            'tokens_generated': action_tokens,
             'completion_message': completion_message,
             'turn_number': self.game_state.temporal.turn,
             'performance_ms': (time.time() - self.turn_start_time) * 1000,
@@ -88,7 +84,7 @@ class DnDGameEngine:
         
         # Debug output
         if self.config.debug_tokenization:
-            print(f"[DND_ENGINE] Turn {self.game_state.temporal.turn}: Generated {len(all_tokens)} tokens")
+            print(f"[DND_ENGINE] Turn {self.game_state.temporal.turn}: Generated {len(action_tokens)} tokens")
             print(f"[DND_ENGINE] Performance: {turn_result['performance_ms']:.2f}ms")
         
         return turn_result
@@ -147,7 +143,6 @@ class DnDGameEngine:
         
         # Use same processing as regular turn
         action_tokens = outcome.tokens_generated or []
-        context_tokens = self._generate_context_tokens()
         
         if outcome.success and outcome.state_changes:
             self._apply_state_changes(outcome.state_changes)
@@ -157,7 +152,7 @@ class DnDGameEngine:
         
         return {
             'outcome': outcome,
-            'tokens_generated': action_tokens + context_tokens,
+            'tokens_generated': action_tokens,
             'turn_number': self.game_state.temporal.turn,
             'game_state': self.game_state
         }
@@ -173,17 +168,6 @@ class DnDGameEngine:
             self.action_context.combat, 
             self.action_context.social
         )
-    
-    def _generate_context_tokens(self) -> List[Token]:
-        """Generate context tokens for current game state."""
-        from text_based_rpg.game_logic.state import WorldStateSnapshot
-        
-        snapshot = WorldStateSnapshot(
-            game_state=self.game_state,
-            discrete_events=[]
-        )
-        
-        return self.tokenizer.process_world_state(snapshot)
     
     def _apply_state_changes(self, state_changes: Dict[str, Any]):
         """Apply state changes from action outcomes."""

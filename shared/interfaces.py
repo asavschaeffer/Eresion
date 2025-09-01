@@ -214,3 +214,40 @@ class IManifestationDirector(ABC):
     def generate_manifestation_directives(self, ability: AssembledAbility) -> List[Dict]:
         """Creates a list of instructions for the game engine to visually and audibly represent an ability."""
         pass
+
+
+class IGameBridge(ABC):
+    """
+    An interface that provides the Eresion Core with a standardized
+    way to query the state of any game, regardless of its implementation.
+    This is the primary bridge between the 'head' and the 'headless core'.
+    """
+    @abstractmethod
+    def get_player_state(self) -> Dict[str, Any]:
+        """Returns a dictionary of the player's core stats like health, stamina."""
+        pass
+
+    @abstractmethod
+    def get_environmental_state(self) -> Dict[str, Any]:
+        """Returns a dictionary of the current environment, like location, weather."""
+        pass
+
+    @abstractmethod
+    def get_social_state(self) -> Dict[str, Any]:
+        """Returns a dictionary of social information, like relationships."""
+        pass
+
+    @abstractmethod
+    def get_temporal_state(self) -> Dict[str, Any]:
+        """Returns a dictionary of time-based information, like turn count."""
+        pass
+
+    @abstractmethod
+    def get_biometric_state(self) -> Dict[str, Any]:
+        """Returns a dictionary of biometric information."""
+        pass
+
+    @abstractmethod
+    def get_all_state_snapshot(self) -> Dict[str, Any]:
+        """Returns a comprehensive snapshot of the entire game state."""
+        pass

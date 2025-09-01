@@ -26,6 +26,7 @@ from eresion_core.tokenization.tokenizer import StreamlinedTokenizer
 # Text-Based RPG Head Imports
 from text_based_rpg.game_logic.state import GameState
 from text_based_rpg.game_logic.integration import DnDGameEngine
+from text_based_rpg.bridge import TextRPGBridge
 from text_based_rpg.ui import StatusHUD, ActionMenu
 from text_based_rpg.config import Config, load_config
 from text_based_rpg.utils import save_game, load_game, get_primitive_registry
@@ -110,6 +111,9 @@ async def run_game(sim_mode=False):
     # The "Head": Manages game rules, state, and action resolution.
     dnd_engine = DnDGameEngine(config, game_state)
 
+    # The Bridge: Connects the game head to the headless core.
+    bridge = TextRPGBridge(game_state)
+
     # The "Headless Core": Manages tokenization, pattern analysis, and emergence.
     # This setup directly reflects the System Integration Diagram.
     analytics_config = DataAnalyticsConfig(motif_stability_threshold=config.motif_stability_threshold)
@@ -120,11 +124,7 @@ async def run_game(sim_mode=False):
         analytics, composer, SimpleBalancer(), MockLLMConnector(), SimpleManifestationDirector()
     )
     eresion_core = EresionCore(
-        StreamlinedTokenizer(config), 
-        SimpleNeuronalGraph(NeuronalGraphConfig()), 
-        pipeline, 
-        game_state
-    )
+        StreamlinedTokenizer(),
 
     # UI Components
     hud = StatusHUD()
@@ -170,11 +170,12 @@ async def run_game(sim_mode=False):
                 print(f"  Hint: {suggestion}")
 
         # 4. Feed Tokens to Headless Core (EresionCore)
-        # This is the "FastThinking" part of the loop, where the core
-        # immediately processes the results of the player's actions.
-        tokens = turn_result.get('tokens_generated', [])
-        if tokens:
-            eresion_core.process_token_batch(tokens)
+        # The engine returns action tokens; the core generates context tokens.
+        action_tokens = turn_result.get('tokens_generated', [])
+        context_tokens = eresion_core.tokenizer.process_world_state(bridge)
+        all_tokens = action_tokens + context_tokens
+        if all_tokens:
+            eresion_core.process_token_batch(all_tokens)
 
         # 5. Run Slow Thinking Loop
         # The core asynchronously analyzes history for deeper patterns.

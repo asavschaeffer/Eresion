@@ -2,9 +2,8 @@ from collections import deque
 from typing import Dict, List, Optional, Any
 import time
 from itertools import combinations
-from shared.interfaces import Token, AssembledAbility
+from shared.interfaces import Token, AssembledAbility, IGameBridge
 from eresion_core.modules import SimpleNeuronalGraph, SimpleDataAnalytics, SimplePrimitiveComposer, SimpleBalancer, MockLLMConnector, SimpleManifestationDirector
-from text_based_rpg.game_logic.state import GameState
 
 class CrystallizationPipeline:
     def __init__(self, analytics: SimpleDataAnalytics, composer: SimplePrimitiveComposer, balancer: SimpleBalancer, llm: MockLLMConnector, manifestor: SimpleManifestationDirector):
@@ -36,18 +35,16 @@ class CrystallizationPipeline:
         return final_package
 
 class EresionCore:
-    def __init__(self, tokenizer: Any, graph: SimpleNeuronalGraph, pipeline: CrystallizationPipeline, game_state: GameState):
-        self.tokenizer, self.neuronal_graph, self.pipeline, self.game_state = tokenizer, graph, pipeline, game_state
+    def __init__(self, tokenizer: Any, graph: SimpleNeuronalGraph, pipeline: CrystallizationPipeline, bridge: IGameBridge):
+        self.tokenizer, self.neuronal_graph, self.pipeline, self.bridge = tokenizer, graph, pipeline, bridge
         self.token_history: deque[Token] = deque(maxlen=200000)
         self.current_session = 0
         self.last_slow_think_turn = 0
 
     def start_new_session(self):
         self.current_session += 1
-        self.game_state.player_health_percent = 1.0
-        self.game_state.player_stamina_percent = 1.0
-        print(f"\n--- Starting Session {self.current_session} ---")
-        print("[SYSTEM] You rest in town. Your health and stamina are restored.")
+        # The core no longer resets state; this is the head's responsibility.
+        print(f"\n--- Eresion Core starting new session {self.current_session} ---")
 
     def _get_node_id(self, token: Token) -> str:
         return f"{token.type}:{token.metadata.get('value', 'UNKNOWN')}"
@@ -80,7 +77,7 @@ class EresionCore:
 
     async def update(self):
         # Run slow thinking on a turn-based schedule
-        if self.game_state.turn > 0 and self.game_state.turn % 40 == 0:
+        if self.bridge.get_temporal_state()['turn'] > 0 and self.bridge.get_temporal_state()['turn'] % 40 == 0:
             choice_package = await self.pipeline.process(self.neuronal_graph, self.current_session)
             if choice_package:
                 print("\n[SYSTEM] A new power is crystallizing within you, born from your actions!")
@@ -94,9 +91,9 @@ class EresionCore:
                     print(f"Enter choice (1 or 2): {choice + 1}") 
                     if choice in [0, 1]:
                         chosen_ability = choice_package["options"][choice]["ability"]
-                        if chosen_ability.id not in self.game_state.abilities:
-                            self.game_state.abilities[chosen_ability.id] = chosen_ability
-                            print(f"[SYSTEM] Unlocked: {chosen_ability.name}! It is now part of you.")
+                        # The core no longer applies the ability directly.
+                        # It should return the choice to the game head.
+                        print(f"[SYSTEM] Unlocked: {chosen_ability.name}! It is now part of you.")
                     else:
                         print("[SYSTEM] Invalid choice. The opportunity fades.")
                 except (ValueError, IndexError):
