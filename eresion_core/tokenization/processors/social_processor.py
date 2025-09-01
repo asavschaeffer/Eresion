@@ -2,8 +2,8 @@
 import time
 from typing import List
 
-from interfaces import IStreamProcessor, Token, TokenType
-from ..game_state import GameState
+from shared.interfaces import IStreamProcessor, Token, TokenType
+from text_based_rpg.game_logic.state import GameState
 
 class SocialProcessor(IStreamProcessor):
     """

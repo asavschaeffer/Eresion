@@ -2,9 +2,9 @@ from collections import deque
 from typing import Dict, List, Optional, Any
 import time
 from itertools import combinations
-from interfaces import Token, AssembledAbility
-from .modules import SimpleNeuronalGraph, SimpleDataAnalytics, SimplePrimitiveComposer, SimpleBalancer, MockLLMConnector, SimpleManifestationDirector
-from .game_state import GameState
+from shared.interfaces import Token, AssembledAbility
+from eresion_core.modules import SimpleNeuronalGraph, SimpleDataAnalytics, SimplePrimitiveComposer, SimpleBalancer, MockLLMConnector, SimpleManifestationDirector
+from text_based_rpg.game_logic.state import GameState
 
 class CrystallizationPipeline:
     def __init__(self, analytics: SimpleDataAnalytics, composer: SimplePrimitiveComposer, balancer: SimpleBalancer, llm: MockLLMConnector, manifestor: SimpleManifestationDirector):

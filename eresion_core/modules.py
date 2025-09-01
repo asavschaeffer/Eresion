@@ -2,7 +2,7 @@ import time
 from collections import defaultdict
 import numpy as np
 from typing import List, Dict, Optional, Tuple, Any
-from interfaces import (
+from shared.interfaces import (
     NeuronalGraphConfig, DataAnalyticsConfig, BalancerConfig,
     Token, BehavioralMotif, AssembledAbility, AbilityPrimitive, TriggerCondition,
     INeuronalGraph, IDataAnalytics, IPrimitiveComposer, IBalancer, ILLMConnector, IManifestationDirector

@@ -1,0 +1,303 @@
+{
+  "action_modifiers": {
+    "QUICK": {
+      "name": "QUICK",
+      "aliases": ["quickly", "fast", "rapid", "swift", "hastily", "speedily"],
+      "speed_multiplier": 1.5,
+      "damage_multiplier": 0.8,
+      "stamina_multiplier": 1.2,
+      "accuracy_multiplier": 0.9,
+      "stealth_bonus": 0.0,
+      "social_bonus": 0.0,
+      "description": "Fast but less powerful and more tiring",
+      "behavioral_effects": {
+        "risk_tolerance": 0.2,
+        "patience": -0.3,
+        "creativity": 0.1,
+        "efficiency": -0.1
+      },
+      "narrative_templates": [
+        "You move with lightning speed!",
+        "Your swift action catches them off-guard!",
+        "Quick reflexes guide your movement!"
+      ]
+    },
+    
+    "POWERFUL": {
+      "name": "POWERFUL",
+      "aliases": ["powerfully", "strong", "mighty", "forceful", "heavy"],
+      "speed_multiplier": 0.7,
+      "damage_multiplier": 1.4,
+      "stamina_multiplier": 1.5,
+      "accuracy_multiplier": 0.8,
+      "stealth_bonus": -0.2,
+      "social_bonus": 0.0,
+      "description": "Slow but devastating and exhausting",
+      "behavioral_effects": {
+        "aggression": 0.3,
+        "efficiency": -0.2,
+        "risk_tolerance": 0.1,
+        "patience": 0.1
+      },
+      "narrative_templates": [
+        "Your powerful strike resonates through the area!",
+        "You put all your strength behind the action!",
+        "The sheer force of your action is impressive!"
+      ]
+    },
+    
+    "CAUTIOUS": {
+      "name": "CAUTIOUS", 
+      "aliases": ["cautiously", "carefully", "slow", "deliberate", "thoughtful"],
+      "speed_multiplier": 0.9,
+      "damage_multiplier": 0.9,
+      "stamina_multiplier": 0.8,
+      "accuracy_multiplier": 1.2,
+      "stealth_bonus": 0.1,
+      "social_bonus": 0.05,
+      "description": "Careful and accurate, conserves energy",
+      "behavioral_effects": {
+        "risk_tolerance": -0.2,
+        "patience": 0.3,
+        "efficiency": 0.1,
+        "wisdom": 0.2
+      },
+      "narrative_templates": [
+        "Your careful approach pays off.",
+        "Methodical precision guides your action.",
+        "You take your time to do it right."
+      ]
+    },
+    
+    "STEALTHY": {
+      "name": "STEALTHY",
+      "aliases": ["stealthily", "sneakily", "quietly", "hidden", "covertly"],
+      "speed_multiplier": 0.8,
+      "damage_multiplier": 1.0,
+      "stamina_multiplier": 1.1,
+      "accuracy_multiplier": 1.0,
+      "stealth_bonus": 0.3,
+      "social_bonus": -0.1,
+      "description": "Hidden and sneaky, harder to detect",
+      "behavioral_effects": {
+        "creativity": 0.2,
+        "patience": 0.2,
+        "social_orientation": -0.1,
+        "risk_tolerance": 0.1
+      },
+      "narrative_templates": [
+        "You move like a shadow in the darkness.",
+        "Your stealthy approach goes unnoticed.",
+        "Silent as the night, you act unseen."
+      ],
+      "requirements": {
+        "not_in_bright_light": true,
+        "not_heavily_armored": true
+      }
+    },
+    
+    "FRIENDLY": {
+      "name": "FRIENDLY",
+      "aliases": ["warmly", "kindly", "amicably", "cheerfully", "pleasantly"],
+      "speed_multiplier": 1.0,
+      "damage_multiplier": 1.0,
+      "stamina_multiplier": 1.0,
+      "accuracy_multiplier": 1.0,
+      "stealth_bonus": 0.0,
+      "social_bonus": 0.2,
+      "description": "Warm and approachable in social situations",
+      "behavioral_effects": {
+        "social_orientation": 0.3,
+        "aggression": -0.2,
+        "creativity": 0.1,
+        "patience": 0.1
+      },
+      "narrative_templates": [
+        "Your warm demeanor puts them at ease.",
+        "A genuine smile accompanies your action.",
+        "Your friendly approach opens doors."
+      ],
+      "applicable_actions": ["influence", "talk", "trade", "help"]
+    },
+    
+    "RESPECTFUL": {
+      "name": "RESPECTFUL",
+      "aliases": ["respectfully", "politely", "formally", "courteously", "dignified"],
+      "speed_multiplier": 0.95,
+      "damage_multiplier": 1.0,
+      "stamina_multiplier": 1.0,
+      "accuracy_multiplier": 1.05,
+      "stealth_bonus": 0.0,
+      "social_bonus": 0.15,
+      "description": "Polite and formal, shows proper respect",
+      "behavioral_effects": {
+        "social_orientation": 0.2,
+        "patience": 0.2,
+        "wisdom": 0.1,
+        "creativity": -0.05
+      },
+      "narrative_templates": [
+        "Your respectful manner shows proper decorum.",
+        "You act with dignified restraint.",
+        "Proper etiquette guides your approach."
+      ],
+      "applicable_actions": ["influence", "talk", "ready", "examine"]
+    },
+    
+    "AGGRESSIVE": {
+      "name": "AGGRESSIVE", 
+      "aliases": ["aggressively", "fiercely", "violently", "brutally", "savagely"],
+      "speed_multiplier": 1.2,
+      "damage_multiplier": 1.3,
+      "stamina_multiplier": 1.4,
+      "accuracy_multiplier": 0.8,
+      "stealth_bonus": -0.3,
+      "social_bonus": -0.3,
+      "description": "Fierce and brutal but reckless",
+      "behavioral_effects": {
+        "aggression": 0.4,
+        "risk_tolerance": 0.3,
+        "social_orientation": -0.3,
+        "patience": -0.2
+      },
+      "narrative_templates": [
+        "Fury drives your violent action!",
+        "You attack with savage intensity!",
+        "Raw aggression fuels your strike!"
+      ],
+      "applicable_actions": ["attack", "intimidate"],
+      "consequences": {
+        "reputation_impact": -0.1,
+        "fear_factor": 0.2
+      }
+    },
+    
+    "DESPERATE": {
+      "name": "DESPERATE",
+      "aliases": ["desperately", "frantically", "wildly", "recklessly"],
+      "speed_multiplier": 1.3,
+      "damage_multiplier": 1.1,
+      "stamina_multiplier": 1.6,
+      "accuracy_multiplier": 0.7,
+      "stealth_bonus": -0.2,
+      "social_bonus": -0.1,
+      "description": "Frantic and reckless when hope is low",
+      "behavioral_effects": {
+        "risk_tolerance": 0.4,
+        "patience": -0.4,
+        "efficiency": -0.3,
+        "creativity": 0.2
+      },
+      "narrative_templates": [
+        "Desperation drives you to extremes!",
+        "You act with wild, reckless abandon!",
+        "Nothing left to lose fuels your action!"
+      ],
+      "activation_conditions": {
+        "low_health": 0.3,
+        "low_stamina": 0.2,
+        "in_danger": true
+      }
+    }
+  },
+  
+  "modifier_combinations": {
+    "mutually_exclusive": [
+      ["QUICK", "CAUTIOUS"],
+      ["POWERFUL", "STEALTHY"],
+      ["FRIENDLY", "AGGRESSIVE"],
+      ["RESPECTFUL", "DESPERATE"]
+    ],
+    
+    "synergistic": [
+      {
+        "modifiers": ["CAUTIOUS", "STEALTHY"],
+        "bonus_effect": {
+          "stealth_bonus": 0.1,
+          "accuracy_multiplier": 1.1
+        },
+        "description": "Patient stealth improves effectiveness"
+      },
+      {
+        "modifiers": ["QUICK", "DESPERATE"],
+        "bonus_effect": {
+          "speed_multiplier": 1.2,
+          "risk_tolerance": 0.1
+        },
+        "description": "Desperation amplifies speed"
+      }
+    ]
+  },
+  
+  "contextual_modifiers": {
+    "environmental": {
+      "in_darkness": {
+        "STEALTHY": {
+          "stealth_bonus": 0.2
+        }
+      },
+      "in_combat": {
+        "CAUTIOUS": {
+          "accuracy_multiplier": 1.1
+        },
+        "AGGRESSIVE": {
+          "damage_multiplier": 1.1
+        }
+      },
+      "in_town": {
+        "FRIENDLY": {
+          "social_bonus": 0.1
+        },
+        "RESPECTFUL": {
+          "social_bonus": 0.1
+        }
+      }
+    },
+    
+    "situational": {
+      "low_health": {
+        "available_modifiers": ["DESPERATE", "CAUTIOUS"],
+        "restricted_modifiers": ["POWERFUL", "AGGRESSIVE"]
+      },
+      "high_stamina": {
+        "enhanced_modifiers": ["QUICK", "POWERFUL"],
+        "bonus_multiplier": 1.1
+      },
+      "in_stealth": {
+        "required_modifiers": ["STEALTHY"],
+        "forbidden_modifiers": ["AGGRESSIVE", "POWERFUL"]
+      }
+    }
+  },
+  
+  "learning_modifiers": {
+    "adaptive_usage": {
+      "description": "Modifiers become more effective with repeated use",
+      "experience_bonus": {
+        "uses_1_5": 1.0,
+        "uses_6_15": 1.05,
+        "uses_16_30": 1.1,
+        "uses_31_plus": 1.15
+      }
+    },
+    
+    "mastery_unlocks": {
+      "QUICK": {
+        "mastery_level": 20,
+        "unlocks": "LIGHTNING_QUICK",
+        "bonus": {
+          "speed_multiplier": 1.8,
+          "stamina_multiplier": 1.0
+        }
+      },
+      "STEALTHY": {
+        "mastery_level": 15,
+        "unlocks": "SHADOW_WALKER",
+        "bonus": {
+          "stealth_bonus": 0.5,
+          "detection_immunity": 0.3
+        }
+      }
+    }
+  }
+}

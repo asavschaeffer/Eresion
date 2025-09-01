@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import time
 from typing import List, Literal, Dict, Any, Optional
-from interfaces import Token, AssembledAbility  # Import schemas
+from shared.interfaces import Token, AssembledAbility  # Import schemas
 
 @dataclass
 class PlayerBuff:
@@ -48,17 +48,37 @@ class EnvironmentalState:
     time_of_day: Literal["Morning", "Afternoon", "Evening", "Night"] = "Afternoon"
     weather: Literal["Clear", "Overcast", "Rain"] = "Clear"
     active_world_events: List[str] = field(default_factory=list)
-    nearby_entities: List[str] = field(default_factory=lambda: ["Grumpy Blacksmith", "Town Guard"])  # Legacy support
     
-    # Entity system for Phase 1/2 - will gradually replace nearby_entities
-    entity_map: Dict[str, 'Entity'] = field(default_factory=dict)
+    # FIXED: Location-scoped entity management instead of global accumulation
+    current_location_entities: Dict[str, 'Entity'] = field(default_factory=dict)
     
     def get_entities_by_type(self, hostile: bool = None) -> List['Entity']:
-        """Get entities filtered by type."""
-        entities = list(self.entity_map.values())
+        """Get entities filtered by type from current location only."""
+        entities = list(self.current_location_entities.values())
         if hostile is not None:
             entities = [e for e in entities if e.is_hostile == hostile]
         return entities
+    
+    def get_current_location_entity(self, entity_name: str) -> Optional['Entity']:
+        """Get entity by name from current location only."""
+        return self.current_location_entities.get(entity_name.lower())
+    
+    def set_location_entities(self, entities: Dict[str, 'Entity']):
+        """Set entities for current location, clearing previous entities."""
+        self.current_location_entities = entities.copy()
+    
+    def clear_entities(self):
+        """Clear all entities from current location."""
+        self.current_location_entities.clear()
+    
+    def add_entity(self, entity_key: str, entity: 'Entity'):
+        """Add single entity to current location."""
+        self.current_location_entities[entity_key.lower()] = entity
+    
+    def remove_entity(self, entity_key: str):
+        """Remove entity from current location."""
+        if entity_key.lower() in self.current_location_entities:
+            del self.current_location_entities[entity_key.lower()]
 
 @dataclass
 class BiometricState:
@@ -100,80 +120,63 @@ class GameState:
     # System-level data
     token_history: List[Token] = field(default_factory=list)  # For persistence
     
+    def update_location(self, new_location: str, data_loader=None):
+        """Update player location and reload entities for spatial consistency."""
+        # Store previous location
+        self.player.previous_location = self.player.location
+        self.player.location = new_location
+        
+        # CRITICAL FIX: Clear old entities and load new ones for current location
+        self.reload_location_entities(data_loader)
+    
+    def reload_location_entities(self, data_loader=None):
+        """Reload entities for current location from data configuration."""
+        if data_loader is None:
+            from text_based_rpg.data_loader import get_data_loader
+            data_loader = get_data_loader()
+        
+        # Convert location name to data key
+        location_key = self.player.location.lower().replace(" ", "_")
+        
+        # Load entities for current location
+        location_entities = data_loader.get_entities_for_location(location_key)
+        
+        # Convert to entity map with proper keys
+        entity_map = {}
+        for entity in location_entities:
+            entity_key = entity.name.lower().replace(" ", "_")
+            entity_map[entity_key] = entity
+        
+        # Set location-scoped entities (this clears previous entities)
+        self.environment.set_location_entities(entity_map)
+    
+    def get_current_location_entity(self, entity_name: str) -> Optional['Entity']:
+        """Get entity by name from current location only."""
+        return self.environment.get_current_location_entity(entity_name)
+    
+    def get_current_location_entities(self) -> Dict[str, 'Entity']:
+        """Get all entities in current location."""
+        return self.environment.current_location_entities.copy()
+    
     def initialize_default_entities(self):
         """Initialize default entities for the game world using data-driven approach."""
-        # Import here to avoid circular dependency
-        from .game_data import create_entity, get_location_entities
-        import random
-        
-        # Get possible entities for current location
-        possible_entities = get_location_entities(self.player.location)
-        
-        if possible_entities:
-            # Create 1-2 entities randomly from the location's spawn table
-            num_entities = random.randint(1, min(2, len(possible_entities)))
-            selected_types = random.sample(possible_entities, num_entities)
-            
-            self.environment.entity_map = {}
-            for entity_type in selected_types:
-                entity_instance = create_entity(entity_type)
-                # Use lowercase key for consistency with existing code
-                self.environment.entity_map[entity_type] = entity_instance
-        else:
-            # Fallback for unknown locations
-            self.environment.entity_map = {}
-        
-        # Keep legacy list in sync for compatibility
-        self.environment.nearby_entities = [entity.name for entity in self.environment.entity_map.values()]
+        # Use the new location-aware entity loading
+        self.reload_location_entities()
     
-    # Backward compatibility properties
+    # NEW: Spatial entity access methods
     @property
-    def player_location(self) -> str:
-        return self.player.location
+    def entity_map(self) -> Dict[str, 'Entity']:
+        """Get current location entities (replaces global entity_map)."""
+        return self.environment.current_location_entities
     
-    @player_location.setter
-    def player_location(self, value: str):
-        self.player.location = value
-        
-    @property
-    def previous_location(self) -> str:
-        return self.player.previous_location
+    @entity_map.setter  
+    def entity_map(self, value: Dict[str, 'Entity']):
+        """Set current location entities."""
+        self.environment.set_location_entities(value)
     
-    @previous_location.setter
-    def previous_location(self, value: str):
-        self.player.previous_location = value
-        
-    @property
-    def player_health_percent(self) -> float:
-        return self.player.health_percent
-    
-    @player_health_percent.setter
-    def player_health_percent(self, value: float):
-        self.player.health_percent = value
-        
-    @property
-    def player_stamina_percent(self) -> float:
-        return self.player.stamina_percent
-    
-    @player_stamina_percent.setter
-    def player_stamina_percent(self, value: float):
-        self.player.stamina_percent = value
-        
-    @property
-    def in_combat(self) -> bool:
-        return self.player.in_combat
-    
-    @in_combat.setter
-    def in_combat(self, value: bool):
-        self.player.in_combat = value
-        
-    @property
-    def nearby_entities(self) -> List[str]:
-        return self.environment.nearby_entities
-    
-    @nearby_entities.setter
-    def nearby_entities(self, value: List[str]):
-        self.environment.nearby_entities = value
+    def get_entity(self, entity_name: str) -> Optional['Entity']:
+        """Get entity from current location only (fixes spatial bug)."""
+        return self.environment.get_current_location_entity(entity_name)
         
     @property
     def abilities(self) -> Dict[str, AssembledAbility]:

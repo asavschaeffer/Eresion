@@ -1,4 +1,4 @@
-from .game_state import GameState
+from text_based_rpg.game_logic.state import GameState
 from typing import List
 
 class StatusHUD:
@@ -44,13 +44,13 @@ class ActionMenu:
             context_actions.append("TRAVEL")
             
             # Attack available if hostiles nearby and player has stamina
-            hostile_entities = [name for name, entity in game_state.environment.entity_map.items() 
+            hostile_entities = [name for name, entity in game_state.environment.current_location_entities.items() 
                               if entity.is_hostile and entity.is_alive]
             if hostile_entities and game_state.player.stamina_percent > 0.15:
                 context_actions.append("ATTACK")
             
             # Talk available if friendlies nearby
-            friendly_entities = [name for name, entity in game_state.environment.entity_map.items() 
+            friendly_entities = [name for name, entity in game_state.environment.current_location_entities.items() 
                                if not entity.is_hostile and entity.is_alive]
             if friendly_entities:
                 context_actions.append("TALK")
@@ -89,7 +89,7 @@ class ActionMenu:
         elif game_state.player.stamina_percent < 0.3:
             print("  >> Low stamina! REST to recover before taking action")
         else:
-            hostile_entities = [name for name, entity in game_state.environment.entity_map.items() 
+            hostile_entities = [name for name, entity in game_state.environment.current_location_entities.items() 
                               if entity.is_hostile and entity.is_alive]
             if hostile_entities:
                 print(f"  >> Hostiles nearby: {', '.join(hostile_entities)}. ATTACK <target> to engage")

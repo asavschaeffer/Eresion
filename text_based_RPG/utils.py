@@ -2,11 +2,10 @@ import json
 import os
 import random
 from typing import Optional
-from .game_state import GameState
-from interfaces import Token, AssembledAbility, AbilityPrimitive, TriggerCondition
+from text_based_rpg.game_logic.state import GameState
+from shared.interfaces import Token, AssembledAbility, AbilityPrimitive, TriggerCondition
 
-def random_player_style() -> str:
-    return random.choice(["ATTACK", "DODGE", "HEAL"])
+
 
 def save_game(game_state: GameState, session_num: int):
     os.makedirs("saves", exist_ok=True)

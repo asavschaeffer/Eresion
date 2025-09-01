@@ -1,0 +1,359 @@
+{
+  "entities": {
+    "blacksmith": {
+      "name": "Grumpy Blacksmith",
+      "display_name": "Blacksmith",
+      "type": "npc",
+      "is_hostile": false,
+      "is_alive": true,
+      "stats": {
+        "health": 1.0,
+        "strength": 0.8,
+        "charisma": 0.3,
+        "wisdom": 0.7
+      },
+      "behavior": {
+        "aggression": 0.1,
+        "friendliness": 0.4,
+        "helpfulness": 0.6,
+        "suspicion": 0.7
+      },
+      "dialogue": {
+        "topics": ["trade", "local_news", "crafting"],
+        "personality": "gruff",
+        "greeting": "What do ye want? I've got work to do.",
+        "responses": {
+          "friendly": "Well, aren't ye a pleasant one. That's rare these days.",
+          "respectful": "At least someone knows how to show proper respect.",
+          "casual": "Aye, I suppose I can spare a moment to chat.",
+          "rude": "Watch yer tongue, or ye'll be needin' a new set of teeth."
+        }
+      },
+      "services": {
+        "can_trade": true,
+        "can_repair": true,
+        "can_craft": true,
+        "specialties": ["weapons", "armor", "tools"]
+      },
+      "location_preferences": ["town_square"],
+      "schedule": {
+        "morning": "working",
+        "afternoon": "working", 
+        "evening": "relaxing",
+        "night": "sleeping"
+      }
+    },
+    
+    "guard": {
+      "name": "Town Guard",
+      "display_name": "Guard",
+      "type": "npc",
+      "is_hostile": false,
+      "is_alive": true,
+      "stats": {
+        "health": 1.0,
+        "strength": 0.9,
+        "charisma": 0.6,
+        "wisdom": 0.5
+      },
+      "behavior": {
+        "aggression": 0.2,
+        "friendliness": 0.6,
+        "helpfulness": 0.8,
+        "suspicion": 0.5
+      },
+      "dialogue": {
+        "topics": ["law", "safety", "threats", "directions"],
+        "personality": "dutiful",
+        "greeting": "Good day, citizen. How can I assist you?",
+        "responses": {
+          "friendly": "It's always good to meet a friendly face around here.",
+          "respectful": "I appreciate your respect for the law and order.",
+          "casual": "Things have been quiet lately, thankfully.",
+          "suspicious": "You're not planning any trouble, are you?"
+        }
+      },
+      "services": {
+        "can_give_directions": true,
+        "can_report_crimes": true,
+        "can_provide_escort": false
+      },
+      "location_preferences": ["town_square"],
+      "patrol_route": ["town_square", "merchant_district"],
+      "schedule": {
+        "morning": "patrolling",
+        "afternoon": "stationed",
+        "evening": "patrolling",
+        "night": "night_watch"
+      }
+    },
+    
+    "goblin": {
+      "name": "Goblin",
+      "display_name": "Goblin",
+      "type": "monster",
+      "is_hostile": true,
+      "is_alive": true,
+      "stats": {
+        "health": 0.7,
+        "strength": 0.4,
+        "speed": 0.8,
+        "cunning": 0.6
+      },
+      "combat": {
+        "base_damage": [0.05, 0.12],
+        "attack_patterns": ["quick_slash", "dirty_fighting"],
+        "weaknesses": ["light", "loud_noises"],
+        "resistances": ["poison"],
+        "special_abilities": ["pack_tactics"]
+      },
+      "behavior": {
+        "aggression": 0.8,
+        "cowardice": 0.6,
+        "pack_mentality": 0.9,
+        "treasure_seeking": 0.7
+      },
+      "drops": {
+        "common": ["rusty_dagger", "tattered_cloth"],
+        "uncommon": ["silver_coin", "crude_map"],
+        "rare": ["goblin_ear_necklace"]
+      },
+      "location_preferences": ["deep_forest", "abandoned_ruins"],
+      "spawn_conditions": {
+        "min_group_size": 1,
+        "max_group_size": 3,
+        "spawn_chance": 0.4
+      }
+    },
+    
+    "wolf": {
+      "name": "Wolf",
+      "display_name": "Wolf",
+      "type": "beast",
+      "is_hostile": true,
+      "is_alive": true,
+      "stats": {
+        "health": 0.8,
+        "strength": 0.7,
+        "speed": 0.9,
+        "cunning": 0.5
+      },
+      "combat": {
+        "base_damage": [0.08, 0.15],
+        "attack_patterns": ["bite", "pounce"],
+        "weaknesses": ["fire"],
+        "resistances": ["cold"],
+        "special_abilities": ["pack_hunt", "howl"]
+      },
+      "behavior": {
+        "aggression": 0.6,
+        "territorial": 0.8,
+        "pack_mentality": 0.9,
+        "flee_threshold": 0.3
+      },
+      "drops": {
+        "common": ["wolf_pelt", "wolf_fang"],
+        "uncommon": ["wolf_meat"],
+        "rare": ["alpha_wolf_pelt"]
+      },
+      "location_preferences": ["deep_forest", "crystal_cave"],
+      "spawn_conditions": {
+        "min_group_size": 1,
+        "max_group_size": 2,
+        "spawn_chance": 0.3,
+        "preferred_time": "night"
+      }
+    },
+    
+    "ancient_guardian": {
+      "name": "Ancient Guardian",
+      "display_name": "Ancient Guardian", 
+      "type": "construct",
+      "is_hostile": true,
+      "is_alive": true,
+      "stats": {
+        "health": 2.0,
+        "strength": 1.5,
+        "speed": 0.3,
+        "magic_resistance": 0.8
+      },
+      "combat": {
+        "base_damage": [0.15, 0.25],
+        "attack_patterns": ["stone_fist", "earth_spike"],
+        "weaknesses": ["lightning"],
+        "resistances": ["physical", "poison", "charm"],
+        "special_abilities": ["stone_skin", "regeneration"]
+      },
+      "behavior": {
+        "aggression": 0.9,
+        "territorial": 1.0,
+        "intelligence": 0.3,
+        "patience": 1.0
+      },
+      "drops": {
+        "common": ["stone_fragment", "ancient_rune"],
+        "uncommon": ["guardian_core"],
+        "rare": ["artifact_shard", "ancient_knowledge"]
+      },
+      "location_preferences": ["abandoned_ruins"],
+      "spawn_conditions": {
+        "unique": true,
+        "respawn_time": "never",
+        "activation_trigger": "disturb_ruins"
+      }
+    },
+    
+    "crystal_sprite": {
+      "name": "Crystal Sprite",
+      "display_name": "Crystal Sprite",
+      "type": "fey",
+      "is_hostile": false,
+      "is_alive": true,
+      "stats": {
+        "health": 0.5,
+        "speed": 1.2,
+        "magic_power": 0.9,
+        "evasion": 1.0
+      },
+      "behavior": {
+        "aggression": 0.1,
+        "curiosity": 0.9,
+        "playfulness": 0.8,
+        "helpfulness": 0.6
+      },
+      "dialogue": {
+        "topics": ["crystals", "magic", "secrets", "riddles"],
+        "personality": "playful",
+        "greeting": "Sparkle-friend! You glow with interesting energy!",
+        "responses": {
+          "friendly": "Oh, such warm light you have! Tell sprite your stories!",
+          "respectful": "Polite-friend shows good crystal manners!",
+          "curious": "Questions and wonderings! Sprite loves puzzle-games!"
+        }
+      },
+      "services": {
+        "can_enchant": true,
+        "can_guide": true,
+        "riddle_master": true,
+        "crystal_knowledge": true
+      },
+      "location_preferences": ["crystal_cave"],
+      "interaction_effects": {
+        "successful_riddle": "temporary_magic_boost",
+        "friendly_conversation": "crystal_blessing",
+        "respectful_approach": "hidden_path_revealed"
+      }
+    },
+    
+    "treasure_chest": {
+      "name": "Treasure Chest",
+      "display_name": "Chest",
+      "type": "object",
+      "is_hostile": false,
+      "is_alive": false,
+      "stats": {
+        "health": 1.0
+      },
+      "behavior": {},
+      "drops": {
+        "common": ["gold_coins", "old_map"],
+        "rare": ["magic_ring"]
+      },
+      "location_preferences": ["abandoned_ruins"]
+    },
+    
+    "cave_bear": {
+      "name": "Cave Bear",
+      "display_name": "Cave Bear",
+      "type": "beast",
+      "is_hostile": true,
+      "is_alive": true,
+      "stats": {
+        "health": 1.5,
+        "strength": 1.2,
+        "speed": 0.6
+      },
+      "combat": {
+        "base_damage": [0.1, 0.2],
+        "attack_patterns": ["maul", "swipe"],
+        "weaknesses": ["fire"],
+        "resistances": ["cold"]
+      },
+      "behavior": {
+        "aggression": 0.7,
+        "territorial": 0.9
+      },
+      "drops": {
+        "common": ["bear_pelt", "bear_claw"],
+        "rare": ["perfect_bear_pelt"]
+      },
+      "location_preferences": ["crystal_cave"]
+    }
+  },
+  
+  "entity_relationships": {
+    "blacksmith": {
+      "guard": 0.3,
+      "goblin": -0.8,
+      "wolf": -0.6
+    },
+    "guard": {
+      "blacksmith": 0.3,
+      "goblin": -0.9,
+      "wolf": -0.7,
+      "crystal_sprite": 0.1
+    },
+    "crystal_sprite": {
+      "ancient_guardian": -0.2,
+      "guard": 0.1,
+      "goblin": -0.3,
+      "wolf": 0.0
+    }
+  },
+  
+  "spawn_rules": {
+    "location_based": {
+      "town_square": ["blacksmith", "guard"],
+      "deep_forest": ["goblin", "wolf"],
+      "abandoned_ruins": ["ancient_guardian"],
+      "crystal_cave": ["crystal_sprite"]
+    },
+    "time_based": {
+      "night": {
+        "wolf": 1.5,
+        "goblin": 1.2
+      },
+      "day": {
+        "guard": 1.0,
+        "blacksmith": 1.0
+      }
+    },
+    "event_based": {
+      "player_disturbs_ruins": ["ancient_guardian"],
+      "player_brings_crystal": ["crystal_sprite"]
+    }
+  },
+  
+  "group_behaviors": {
+    "goblin_pack": {
+      "entities": ["goblin"],
+      "min_size": 2,
+      "max_size": 4,
+      "bonuses": {
+        "pack_attack": 0.2,
+        "flee_together": true,
+        "share_loot": true
+      }
+    },
+    "wolf_pack": {
+      "entities": ["wolf"],
+      "min_size": 2,
+      "max_size": 3,
+      "bonuses": {
+        "coordinated_attack": 0.3,
+        "howl_summon": true,
+        "alpha_leadership": true
+      }
+    }
+  }
+}

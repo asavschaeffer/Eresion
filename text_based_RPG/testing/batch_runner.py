@@ -25,10 +25,10 @@ from dataclasses import asdict
 # Add parent directory for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from text_based_RPG.main import run_game
-from text_based_RPG.config import Config, load_config
-from text_based_RPG.game_state import GameState
-from interfaces import Token
+from text_based_rpg.main import run_game
+from text_based_rpg.config import Config, load_config
+from text_based_rpg.game_logic.state import GameState
+from shared.interfaces import Token
 
 class BatchRunner:
     """
@@ -103,7 +103,7 @@ class BatchRunner:
         
         try:
             # Import and patch main for batch running
-            from text_based_RPG.main import run_game
+            from text_based_rpg.main import run_game
             
             # Create a controlled version that stops after max_turns
             session_result = await self._run_controlled_session(session_id)
@@ -128,15 +128,16 @@ class BatchRunner:
     
     async def _run_controlled_session(self, session_id: int) -> Dict[str, Any]:
         """Run a controlled session that terminates after max_turns."""
-        from text_based_RPG.game_state import GameState
-        from text_based_RPG.config import load_config
-        from text_based_RPG.world_simulator import WorldSimulator
-        from text_based_RPG.tokenizer import ModularTokenizer
-        from text_based_RPG.modules import SimpleNeuronalGraph, SimpleDataAnalytics, SimplePrimitiveComposer, MockLLMConnector, SimpleManifestationDirector, SimpleBalancer
-        from text_based_RPG.core import EresionCore, CrystallizationPipeline
-        from text_based_RPG.ui import StatusHUD, ActionMenu
-        from text_based_RPG.mechanics import ActionDispatcher, SimpleResolver, EventSystem
-        from interfaces import NeuronalGraphConfig, DataAnalyticsConfig, BalancerConfig, AbilityPrimitive
+        from text_based_rpg.game_logic.state import GameState
+        from text_based_rpg.config import load_config
+        from text_based_rpg.game_logic.world import WorldSimulator
+        from eresion_core.tokenization.tokenizer import ModularTokenizer
+        from eresion_core.modules import SimpleNeuronalGraph, SimpleDataAnalytics, SimplePrimitiveComposer, MockLLMConnector, SimpleManifestationDirector, SimpleBalancer
+        from eresion_core.core_engine import EresionCore, CrystallizationPipeline
+        from text_based_rpg.ui import StatusHUD, ActionMenu
+
+        from text_based_rpg.game_logic.integration import DnDGameEngine
+        from shared.interfaces import NeuronalGraphConfig, DataAnalyticsConfig, BalancerConfig, AbilityPrimitive
         
         session_start_time = time.time()
         
@@ -149,10 +150,8 @@ class BatchRunner:
         world_simulator = WorldSimulator(config)
         tokenizer = ModularTokenizer(config)
         
-        # Phase 1 additions: Dispatcher and Event System
-        event_system = EventSystem()
-        resolver = SimpleResolver(config)
-        action_dispatcher = ActionDispatcher(resolver, event_system)
+        # Initialize components (similar to main.py but controlled)
+        dnd_engine = DnDGameEngine(config, game_state)
         
         # Setup analytics and ability generation pipeline
         analytics_config = DataAnalyticsConfig(
@@ -189,7 +188,7 @@ class BatchRunner:
                turn_count < self.config['max_turns_per_session']):
             
             # Import the process_turn function
-            from text_based_RPG.main import process_turn
+            from text_based_rpg.main import process_turn
             
             # Process turn (but suppress output in batch mode)
             try:
@@ -198,10 +197,14 @@ class BatchRunner:
                 import contextlib
                 
                 with contextlib.redirect_stdout(io.StringIO()):
-                    status = process_turn(
-                        game_state, eresion, hud, action_menu, world_simulator, tokenizer,
-                        action_dispatcher, event_system, sim_mode=True
-                    )
+                    # Generate simulated input for this turn
+                    simulated_input = _get_simulated_input_for_batch(game_state)
+                    
+                    # Process turn using new D&D Game Engine
+                    turn_result = dnd_engine.process_player_turn(simulated_input)
+                    
+                    # Extract status for legacy compatibility
+                    status = "CONTINUE" if turn_result["outcome"].success else "CONTINUE"
                 
                 if status == "QUIT":
                     break
@@ -412,6 +415,29 @@ async def main():
     
     runner = BatchRunner(config)
     await runner.run_batch()
+
+def _get_simulated_input_for_batch(game_state) -> str:
+    """
+    Generate simulated input for batch testing.
+    
+    This is a simplified version of the main.py simulation logic,
+    focused on generating diverse actions for pattern analysis.
+    """
+    import random
+    
+    # Simple action weights for batch testing
+    actions = ["attack", "rest", "travel", "examine"]
+    
+    # Weight actions based on game state
+    if game_state.player.in_combat:
+        actions = ["attack", "defend", "flee"]
+    elif game_state.player.stamina_percent < 0.3:
+        actions = ["rest", "examine"]
+    elif game_state.player.health_percent < 0.5:
+        actions = ["rest", "travel"]
+    
+    return random.choice(actions)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

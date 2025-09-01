@@ -36,9 +36,9 @@ class Config:
     simulation_mode: bool = False
     simulation_speed_multiplier: float = 1.0
     
-    # Analytics settings
-    motif_stability_threshold: float = 0.7
-    session_window_turns: int = 50
+    # Analytics settings - TUNED for faster emergence
+    motif_stability_threshold: float = 0.6  # Reduced from 0.7 for easier crystallization
+    session_window_turns: int = 20  # Reduced from 50 for faster pattern detection
     
     # Debug settings
     debug_tokenization: bool = False

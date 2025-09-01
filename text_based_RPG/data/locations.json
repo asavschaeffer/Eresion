@@ -1,0 +1,201 @@
+{
+  "locations": {
+    "town_square": {
+      "name": "Town Square",
+      "description": "The heart of the town, bustling with activity. Cobblestone streets lead in all directions, and the familiar sounds of commerce fill the air.",
+      "safety_level": "safe",
+      "connections": ["deep_forest"],
+      "default_entities": ["blacksmith", "guard"],
+      "environmental_modifiers": {
+        "social_bonus": 0.1,
+        "rest_effectiveness": 1.5,
+        "stealth_penalty": -0.2
+      },
+      "ambient_description": [
+        "The familiar bustle surrounds you.",
+        "You feel safer in the town's protective walls.",
+        "Merchants hawk their wares nearby.",
+        "The town guard keeps a watchful eye on everyone."
+      ]
+    },
+    "deep_forest": {
+      "name": "Deep Forest", 
+      "description": "Dense woodland stretches in all directions. Ancient trees loom overhead, their branches filtering the sunlight into dancing patterns. The air is thick with the scent of moss and decay.",
+      "safety_level": "dangerous",
+      "connections": ["town_square"],
+      "default_entities": ["goblin", "wolf"],
+      "environmental_modifiers": {
+        "stealth_bonus": 0.2,
+        "visibility_penalty": -0.1,
+        "encounter_chance": 0.3
+      },
+      "ambient_description": [
+        "The trees loom overhead, and you sense danger.",
+        "You hear rustling in the bushes...",
+        "Shadows move between the ancient trunks.",
+        "The forest feels alive with unseen threats."
+      ]
+    },
+    "abandoned_ruins": {
+      "name": "Abandoned Ruins",
+      "description": "Crumbling stone structures hint at a forgotten civilization. Vines have reclaimed much of the architecture, and strange symbols are carved into weathered walls.",
+      "safety_level": "mysterious",
+      "connections": ["deep_forest"],
+      "default_entities": ["ancient_guardian", "treasure_chest"],
+      "environmental_modifiers": {
+        "investigation_bonus": 0.3,
+        "magic_resonance": 0.2,
+        "echo_factor": 0.5
+      },
+      "ambient_description": [
+        "Ancient stones tell stories of a bygone era.",
+        "You sense powerful magic lingering in the air.",
+        "Your footsteps echo strangely in this place.",
+        "Something valuable might be hidden here."
+      ]
+    },
+    "crystal_cave": {
+      "name": "Crystal Cave",
+      "description": "A natural cavern filled with luminescent crystals that pulse with inner light. The walls sparkle with embedded gems, and the air hums with mystical energy.",
+      "safety_level": "neutral",
+      "connections": ["deep_forest"],
+      "default_entities": ["crystal_sprite", "cave_bear"],
+      "environmental_modifiers": {
+        "magic_amplification": 0.4,
+        "light_level": 0.8,
+        "acoustic_dampening": -0.3
+      },
+      "ambient_description": [
+        "Crystals pulse with ethereal light around you.",
+        "The cave hums with mystical energy.",
+        "Beautiful formations catch and reflect light.",
+        "You feel magic flowing through this place."
+      ]
+    }
+  },
+  
+  "location_relationships": {
+    "travel_times": {
+      "town_square": {
+        "deep_forest": 1.0,
+        "abandoned_ruins": 2.0,
+        "crystal_cave": 2.5
+      },
+      "deep_forest": {
+        "town_square": 1.0,
+        "abandoned_ruins": 1.5,
+        "crystal_cave": 1.2
+      },
+      "abandoned_ruins": {
+        "deep_forest": 1.5,
+        "town_square": 2.0,
+        "crystal_cave": 1.8
+      },
+      "crystal_cave": {
+        "deep_forest": 1.2,
+        "town_square": 2.5,
+        "abandoned_ruins": 1.8
+      }
+    },
+    
+    "discovery_requirements": {
+      "abandoned_ruins": {
+        "prerequisite": "explore_deep_forest_3_times",
+        "discovery_chance": 0.3
+      },
+      "crystal_cave": {
+        "prerequisite": "find_crystal_shard",
+        "discovery_chance": 0.5
+      }
+    }
+  },
+  
+  "weather_effects": {
+    "clear": {
+      "description": "The sky is clear and visibility is excellent.",
+      "modifiers": {
+        "visibility_bonus": 0.1,
+        "travel_speed": 1.0,
+        "social_comfort": 0.1
+      }
+    },
+    "overcast": {
+      "description": "Clouds cover the sky, casting everything in muted light.",
+      "modifiers": {
+        "stealth_bonus": 0.05,
+        "travel_speed": 1.0,
+        "mood_penalty": -0.05
+      }
+    },
+    "stormy": {
+      "description": "Rain falls heavily and lightning illuminates the dark clouds.",
+      "modifiers": {
+        "visibility_penalty": -0.2,
+        "stealth_bonus": 0.15,
+        "travel_speed": 0.7,
+        "rest_penalty": -0.3
+      }
+    },
+    "foggy": {
+      "description": "Thick fog reduces visibility to just a few feet.",
+      "modifiers": {
+        "visibility_penalty": -0.4,
+        "stealth_bonus": 0.3,
+        "navigation_difficulty": 0.5
+      }
+    }
+  },
+  
+  "time_of_day_effects": {
+    "dawn": {
+      "description": "The first light of dawn creeps across the landscape.",
+      "modifiers": {
+        "visibility": 0.7,
+        "creature_activity": 0.5,
+        "rest_effectiveness": 1.2
+      }
+    },
+    "morning": {
+      "description": "The sun climbs higher, bringing warmth and clarity.",
+      "modifiers": {
+        "visibility": 1.0,
+        "social_activity": 1.3,
+        "travel_conditions": 1.1
+      }
+    },
+    "afternoon": {
+      "description": "The sun reaches its peak, bathing everything in bright light.",
+      "modifiers": {
+        "visibility": 1.2,
+        "heat_factor": 1.1,
+        "creature_activity": 0.8
+      }
+    },
+    "evening": {
+      "description": "The sun begins to set, casting long shadows.",
+      "modifiers": {
+        "visibility": 0.8,
+        "ambiance": 1.2,
+        "social_gathering": 1.4
+      }
+    },
+    "night": {
+      "description": "Darkness has fallen, and only the moon provides light.",
+      "modifiers": {
+        "visibility": 0.3,
+        "stealth_bonus": 0.4,
+        "creature_danger": 1.5,
+        "rest_effectiveness": 1.3
+      }
+    },
+    "midnight": {
+      "description": "The dead of night, when most sensible folk are asleep.",
+      "modifiers": {
+        "visibility": 0.2,
+        "stealth_bonus": 0.5,
+        "magic_potency": 1.3,
+        "danger_level": 2.0
+      }
+    }
+  }
+}

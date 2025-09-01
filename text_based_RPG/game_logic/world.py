@@ -152,33 +152,7 @@ class WorldSimulator:
         if len(game_state.social.recent_conversations) > 10:
             game_state.social.recent_conversations = game_state.social.recent_conversations[-10:]
             
-    def simulate_player_action(self, game_state: GameState, action: str, target: str = None) -> Dict[str, Any]:
-        """
-        Simulate the consequences of a player action.
-        
-        This method handles combat, travel, and other actions that affect the world state.
-        
-        Args:
-            game_state: Current game state to mutate
-            action: The action being performed ('attack', 'travel', etc.)
-            target: Optional target of the action
-            
-        Returns:
-            Dictionary describing the action results for display to the player
-        """
-        result = {"success": False, "message": "", "consequences": []}
-        
-        if action == "attack" and target:
-            result = self._simulate_combat(game_state, target)
-        elif action == "travel":
-            result = self._simulate_travel(game_state, target)
-        elif action == "talk" and target:
-            result = self._simulate_conversation(game_state, target)
-            
-        # Update action counter
-        game_state.temporal.actions_this_session += 1
-        
-        return result
+    
         
     def _simulate_combat(self, game_state: GameState, target: str) -> Dict[str, Any]:
         """Simulate combat with an entity."""
