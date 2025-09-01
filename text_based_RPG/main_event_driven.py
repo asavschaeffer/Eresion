@@ -20,6 +20,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from text_based_rpg.event_bus import EventBus, get_event_bus
 from text_based_rpg.event_driven_dispatcher import EventDrivenDispatcher, EventDrivenNarrator
 from text_based_rpg.mathematical_tokenizer import MathematicalTokenizer
+from text_based_rpg.temporal_graph import TemporalGraph
+from text_based_rpg.token_processor import TokenProcessor
+from text_based_rpg.ability_crystallizer import AbilityCrystallizer
 
 # Existing system imports
 from text_based_rpg.game_logic.state import GameState
@@ -207,7 +210,32 @@ async def run_event_driven_demo(test_mode: bool = False, num_test_events: int = 
     print(f"Vocabulary size: {len(tokenizer.get_vocabulary())}")
     print(f"Correlation window: {tokenizer.correlation_window_ms}ms")
     
-    # --- 4. EVENT-DRIVEN COMPONENTS SETUP ---
+    # --- 4. TEMPORAL GRAPH SETUP ---
+    temporal_graph = TemporalGraph(config.pipeline, event_bus)
+    temporal_graph.set_debug_mode(True)  # Enable graph debugging
+    
+    print(f"Temporal Graph initialized.")
+    print(f"Analysis interval: {temporal_graph.analysis_interval_s}s")
+    print(f"PMI threshold: {config.pipeline.PMI_THRESHOLD}")
+    print(f"Stability threshold: {config.pipeline.MOTIF_STABILITY_THRESHOLD}")
+    
+    # --- 5. TOKEN PROCESSOR SETUP ---
+    token_processor = TokenProcessor(tokenizer, temporal_graph, event_bus)
+    token_processor.set_debug_mode(True)  # Enable processor debugging
+    
+    print(f"Token Processor initialized.")
+    print(f"Processing interval: {token_processor.process_interval_s}s")
+    
+    # --- 6. ABILITY CRYSTALLIZER SETUP ---
+    ability_crystallizer = AbilityCrystallizer(config.pipeline, event_bus)
+    ability_crystallizer.set_debug_mode(True)  # Enable crystallizer debugging
+    
+    print(f"Ability Crystallizer initialized.")
+    print(f"Template count: {len(ability_crystallizer.templates)}")
+    print(f"Primitive library size: {len(ability_crystallizer.primitives)}")
+    print(f"Power budget limit: {config.pipeline.ABILITY_POWER_BUDGET}")
+    
+    # --- 7. EVENT-DRIVEN COMPONENTS SETUP ---
     # Mock action context (in real system, would come from DnDGameEngine)
     action_context = MockActionContext(game_state)
     
@@ -234,6 +262,13 @@ async def run_event_driven_demo(test_mode: bool = False, num_test_events: int = 
         
         # Allow time for all events to process
         await asyncio.sleep(2.0)
+        
+        # Force process all tokens through the pipeline
+        print(f"\n=== PROCESSING TOKENS THROUGH PIPELINE ===")
+        token_processor.force_process_all_tokens()
+        
+        # Allow time for analysis to complete
+        await asyncio.sleep(1.0)
         
         # Display tokenization results
         print("\n=== TOKENIZATION RESULTS ===")
@@ -275,6 +310,55 @@ async def run_event_driven_demo(test_mode: bool = False, num_test_events: int = 
         print(f"Event type breakdown:")
         for event_type, count in sorted(event_type_counts.items()):
             print(f"  {event_type}: {count}")
+        
+        print(f"\n=== TEMPORAL GRAPH ANALYSIS ===")
+        graph_stats = temporal_graph.get_statistics()
+        print(f"Graph nodes: {graph_stats['nodes']}")
+        print(f"Graph edges: {graph_stats['edges']}")
+        print(f"Strong edges (>0.5): {graph_stats['strong_edges']}")
+        print(f"Average edge weight: {graph_stats['average_edge_weight']:.3f}")
+        print(f"Motifs detected: {graph_stats['motifs_detected']}")
+        
+        # Display detected motifs
+        motifs = temporal_graph.get_motifs()
+        if motifs:
+            print(f"\nDetected behavioral motifs:")
+            for motif in motifs[-5:]:  # Show last 5 motifs
+                print(f"  {motif.id} (stability: {motif.stability:.3f}) - {motif.sequence}")
+        
+        # Display strongest edges
+        edge_data = temporal_graph.get_edge_data()
+        if edge_data:
+            print(f"\nStrongest relationships:")
+            for edge in edge_data[:5]:  # Show top 5 edges
+                print(f"  {edge['source']} → {edge['target']} (weight: {edge['weight']:.3f})")
+        
+        print(f"\n=== PIPELINE ANALYSIS ===")
+        pipeline_summary = token_processor.get_analysis_summary()
+        health = pipeline_summary['pipeline_health']
+        print(f"Tokens in pipeline: {health['tokens_in_pipeline']}")
+        print(f"Tokens processed by graph: {health['tokens_in_graph']}")
+        print(f"Processing ratio: {health['processing_ratio']:.3f}")
+        print(f"Strong relationships: {health['strong_edges']}")
+        print(f"Behavioral patterns: {health['motifs_detected']}")
+        
+        print(f"\n=== ABILITY CRYSTALLIZATION ===")
+        crystal_stats = ability_crystallizer.get_statistics()
+        print(f"Motifs processed: {crystal_stats['motifs_processed']}")
+        print(f"Abilities generated: {crystal_stats['abilities_generated']}")
+        print(f"Success rate: {crystal_stats['success_rate']:.3f}")
+        print(f"Average power cost: {crystal_stats['average_power_cost']:.1f}")
+        
+        # Display generated abilities
+        abilities = ability_crystallizer.get_crystallized_abilities()
+        if abilities:
+            print(f"\nGenerated abilities:")
+            for ability in abilities[-3:]:  # Show last 3 abilities
+                print(f"  '{ability.name}' (cost: {ability.resource_cost:.1f})")
+                print(f"    {ability.narrative}")
+                print(f"    Trigger: {ability.trigger.type}")
+        else:
+            print(f"\nNo abilities generated yet (motif stability may be too low)")
     
     else:
         print("\n=== INTERACTIVE MODE ===")
