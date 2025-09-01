@@ -1,8 +1,38 @@
-# text_based_RPG/config.py
+# text_based_rpg/config.py
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional
 import json
+import math
 from pathlib import Path
+
+@dataclass
+class PipelineConfig:
+    """Mathematical constants for the tokenization and analysis pipeline."""
+    # Reinforcement and decay parameters
+    BETA: float = 0.1  # Reinforcement strength for graph edges
+    TAU: float = 1000.0  # Time constant for exponential decay (ms)
+    LAMBDA: float = 0.001  # Decay rate coefficient
+    
+    # Information theory thresholds
+    PMI_THRESHOLD: float = 2.0  # Pointwise Mutual Information threshold for non-random associations
+    CHI2_THRESHOLD: float = 3.84  # Chi-squared threshold (p<0.05 for df=1)
+    
+    # Stability function parameters (sigmoid)
+    STABILITY_K: float = 0.1  # Sigmoid steepness parameter
+    STABILITY_THETA: float = 5.0  # Sigmoid midpoint for stability calculation
+    MOTIF_STABILITY_THRESHOLD: float = 0.75  # Threshold for considering a motif stable
+    
+    # Fusion multipliers for multi-modal token enhancement
+    FUSION_MULTIPLIERS: Dict[str, float] = field(default_factory=lambda: {
+        'environment': 1.2,  # Environmental context boost
+        'biometric': 1.1,    # Biometric data boost
+        'social': 1.15,      # Social interaction boost
+        'temporal': 1.05,    # Temporal pattern boost
+    })
+    
+    # Power budget for ability crystallization
+    ABILITY_POWER_BUDGET: float = 50.0  # Maximum power cost for generated abilities
+    POWER_SCALE_FACTOR: float = 10.0   # Scaling factor for essence to power conversion
 
 @dataclass
 class StreamConfig:
@@ -25,6 +55,7 @@ class PerformanceConfig:
 @dataclass
 class Config:
     """Master configuration object for the entire Eresion system."""
+    pipeline: PipelineConfig = field(default_factory=PipelineConfig)
     streams: StreamConfig = field(default_factory=StreamConfig)
     performance: PerformanceConfig = field(default_factory=PerformanceConfig)
     
@@ -69,6 +100,13 @@ def load_config(config_path: Optional[str] = None) -> Config:
             with open(config_file, 'r') as f:
                 data = json.load(f)
                 
+            # Update PipelineConfig
+            if 'pipeline' in data:
+                pipeline_data = data['pipeline']
+                for key, value in pipeline_data.items():
+                    if hasattr(config.pipeline, key):
+                        setattr(config.pipeline, key, value)
+            
             # Update StreamConfig
             if 'streams' in data:
                 stream_data = data['streams']
@@ -85,7 +123,7 @@ def load_config(config_path: Optional[str] = None) -> Config:
                         
             # Update top-level Config fields
             for key, value in data.items():
-                if key not in ['streams', 'performance'] and hasattr(config, key):
+                if key not in ['pipeline', 'streams', 'performance'] and hasattr(config, key):
                     setattr(config, key, value)
                     
         except (json.JSONDecodeError, IOError) as e:
@@ -107,6 +145,19 @@ def save_config(config: Config, config_path: Optional[str] = None) -> None:
         
     # Convert dataclasses to dict for JSON serialization
     config_dict = {
+        'pipeline': {
+            'BETA': config.pipeline.BETA,
+            'TAU': config.pipeline.TAU,
+            'LAMBDA': config.pipeline.LAMBDA,
+            'PMI_THRESHOLD': config.pipeline.PMI_THRESHOLD,
+            'CHI2_THRESHOLD': config.pipeline.CHI2_THRESHOLD,
+            'STABILITY_K': config.pipeline.STABILITY_K,
+            'STABILITY_THETA': config.pipeline.STABILITY_THETA,
+            'MOTIF_STABILITY_THRESHOLD': config.pipeline.MOTIF_STABILITY_THRESHOLD,
+            'FUSION_MULTIPLIERS': config.pipeline.FUSION_MULTIPLIERS,
+            'ABILITY_POWER_BUDGET': config.pipeline.ABILITY_POWER_BUDGET,
+            'POWER_SCALE_FACTOR': config.pipeline.POWER_SCALE_FACTOR,
+        },
         'streams': {
             'player_enabled': config.streams.player_enabled,
             'biometric_enabled': config.streams.biometric_enabled,
