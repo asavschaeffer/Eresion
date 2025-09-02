@@ -28,10 +28,25 @@ class Entity:
         # Default stats for entities
         if not self.stats:
             self.stats = {
-                "health": 1.0,
+                "health": 100.0,
                 "speed": 0.5,  # For flee calculations
                 "aggression": 0.5  # For combat behavior
             }
+    
+    @property
+    def health(self) -> float:
+        """Get entity health for action system compatibility."""
+        return self.stats.get('health', 100.0)
+    
+    @health.setter  
+    def health(self, value: float):
+        """Set entity health for action system compatibility."""
+        self.stats['health'] = value
+    
+    @property
+    def max_health(self) -> float:
+        """Get entity max health for action system compatibility."""
+        return self.stats.get('max_health', self.stats.get('health', 100.0))
     
     @property
     def can_be_attacked(self) -> bool:

@@ -21,6 +21,22 @@ class PlayerState:
     action_modifier: Optional[Literal["QUICK", "CAUTIOUS"]] = None
     abilities: Dict[str, AssembledAbility] = field(default_factory=dict)
     
+    # Action system compatibility - actual values
+    health: float = 100.0
+    max_health: float = 100.0
+    stamina: float = 100.0
+    max_stamina: float = 100.0
+    
+    def update_percentages(self):
+        """Update percentage values from actual values."""
+        self.health_percent = self.health / self.max_health if self.max_health > 0 else 0.0
+        self.stamina_percent = self.stamina / self.max_stamina if self.max_stamina > 0 else 0.0
+    
+    def update_actuals(self):
+        """Update actual values from percentages."""
+        self.health = self.health_percent * self.max_health
+        self.stamina = self.stamina_percent * self.max_stamina
+    
     # Buff system for Phase 2
     active_buffs: List[PlayerBuff] = field(default_factory=list)
     

@@ -293,6 +293,8 @@ class TemporalGraph:
                 
                 # Check PMI significance
                 if pmi < self.config.PMI_THRESHOLD:
+                    if self.debug and edge.weight > 0.8:
+                        print(f"[TemporalGraph] Motif {source_type}→{target_type} PMI too low: {pmi:.3f} < {self.config.PMI_THRESHOLD}")
                     continue
                 
                 # Calculate Chi-squared statistic
@@ -302,6 +304,9 @@ class TemporalGraph:
                 stability = self._calculate_stability(chi2)
                 
                 # Check if motif is stable enough
+                if self.debug:
+                    print(f"[TemporalGraph] Checking {source_type}→{target_type}: PMI={pmi:.3f}, χ²={chi2:.3f}, stability={stability:.3f}")
+                
                 if stability >= self.config.MOTIF_STABILITY_THRESHOLD:
                     # Create behavioral motif
                     motif_id = f"{source_type}→{target_type}"

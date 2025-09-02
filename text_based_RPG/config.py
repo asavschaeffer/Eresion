@@ -14,13 +14,13 @@ class PipelineConfig:
     LAMBDA: float = 0.001  # Decay rate coefficient
     
     # Information theory thresholds
-    PMI_THRESHOLD: float = 2.0  # Pointwise Mutual Information threshold for non-random associations
+    PMI_THRESHOLD: float = 0.5  # Pointwise Mutual Information threshold for non-random associations (lowered for demo)
     CHI2_THRESHOLD: float = 3.84  # Chi-squared threshold (p<0.05 for df=1)
     
     # Stability function parameters (sigmoid)
     STABILITY_K: float = 0.1  # Sigmoid steepness parameter
     STABILITY_THETA: float = 5.0  # Sigmoid midpoint for stability calculation
-    MOTIF_STABILITY_THRESHOLD: float = 0.75  # Threshold for considering a motif stable
+    MOTIF_STABILITY_THRESHOLD: float = 0.4  # Threshold for considering a motif stable (lowered for demonstration)
     
     # Fusion multipliers for multi-modal token enhancement
     FUSION_MULTIPLIERS: Dict[str, float] = field(default_factory=lambda: {

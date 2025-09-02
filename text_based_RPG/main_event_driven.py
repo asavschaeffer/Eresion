@@ -11,7 +11,7 @@ import os
 import asyncio
 import time
 import random
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -39,34 +39,43 @@ class MockActionContext(IActionContext):
     
     def __init__(self, game_state: GameState):
         self.game_state = game_state
+        self.current_location = "Test Arena"
+        self.previous_location = None
     
     @property
     def combat(self):
-        return self
+        return MockCombatContext(self.game_state)
     
     @property 
     def movement(self):
-        return self
+        return MockMovementContext(self)
     
     @property
     def resources(self):
-        return self
+        return MockResourceContext(self.game_state)
     
     @property
     def social(self):
-        return self
+        return MockSocialContext(self.game_state)
     
     @property
     def state(self):
-        return self
+        return MockStateContext(self.game_state)
     
     @property
     def environment(self):
-        return self
+        return MockEnvironmentContext()
     
     @property
     def buffs(self):
-        return self
+        return MockBuffContext()
+
+
+class MockCombatContext:
+    """Mock combat context implementation."""
+    
+    def __init__(self, game_state: GameState):
+        self.game_state = game_state
     
     def get_hostile_entities(self):
         """Get hostile entities in current location."""
@@ -75,21 +84,288 @@ class MockActionContext(IActionContext):
     def get_friendly_entities(self):
         """Get friendly entities in current location."""
         return [entity for entity in self.game_state.entity_map.values() if not entity.is_hostile]
+    
+    def get_entity_by_name(self, name: str):
+        """Get entity by name."""
+        return self.game_state.entity_map.get(name.lower())
+    
+    def apply_damage_to_entity(self, target_name: str, damage: float) -> bool:
+        """Apply damage to target entity."""
+        entity = self.get_entity_by_name(target_name)
+        if entity:
+            entity.health = max(0, entity.health - damage)
+            return True
+        return False
+    
+    def apply_damage_to_player(self, damage: float) -> None:
+        """Apply damage to player."""
+        self.game_state.player.health = max(0, self.game_state.player.health - damage)
+    
+    def get_player_health(self) -> float:
+        """Get player's current health percentage."""
+        return self.game_state.player.health / self.game_state.player.max_health
+    
+    def is_player_in_combat(self) -> bool:
+        """Check if player is currently in combat."""
+        return len(self.get_hostile_entities()) > 0
+    
+    def set_combat_state(self, in_combat: bool) -> None:
+        """Set player's combat state."""
+        pass  # Mock implementation
+
+
+class MockMovementContext:
+    """Mock movement context implementation."""
+    
+    def __init__(self, parent_context):
+        self.parent_context = parent_context
+    
+    def get_current_location(self) -> str:
+        """Get player's current location."""
+        return self.parent_context.current_location
+    
+    def get_previous_location(self):
+        """Get player's previous location."""
+        return self.parent_context.previous_location
+    
+    def change_location(self, new_location: str) -> bool:
+        """Change player location."""
+        self.parent_context.previous_location = self.parent_context.current_location
+        self.parent_context.current_location = new_location
+        return True
+    
+    def get_available_exits(self):
+        """Get available exits."""
+        return ["north", "south", "east", "west"]
+    
+    def get_travel_distance(self, destination: str) -> float:
+        """Get travel distance."""
+        return 1.0
+    
+    def is_location_safe(self, location: str) -> bool:
+        """Check if location is safe."""
+        return True
+
+
+class MockResourceContext:
+    """Mock resource context implementation."""
+    
+    def __init__(self, game_state: GameState):
+        self.game_state = game_state
+    
+    def get_player_stamina(self) -> float:
+        """Get player's current stamina percentage."""
+        return self.game_state.player.stamina / self.game_state.player.max_stamina
+    
+    def consume_stamina(self, amount: float) -> bool:
+        """Consume stamina."""
+        if self.game_state.player.stamina >= amount:
+            self.game_state.player.stamina -= amount
+            return True
+        return False
+    
+    def restore_stamina(self, amount: float) -> None:
+        """Restore stamina to player."""
+        self.game_state.player.stamina = min(
+            self.game_state.player.max_stamina,
+            self.game_state.player.stamina + amount
+        )
+    
+    def restore_health(self, amount: float) -> None:
+        """Restore health to player."""
+        self.game_state.player.health = min(
+            self.game_state.player.max_health,
+            self.game_state.player.health + amount
+        )
+    
+    def has_sufficient_stamina(self, required: float) -> bool:
+        """Check if player has sufficient stamina."""
+        return self.game_state.player.stamina >= required
+
+
+class MockSocialContext:
+    """Mock social context implementation."""
+    
+    def __init__(self, game_state: GameState):
+        self.game_state = game_state
+        self.relationships = {}  # npc_name -> score
+    
+    def get_relationship_score(self, npc_name: str) -> float:
+        """Get relationship score with NPC."""
+        return self.relationships.get(npc_name.lower(), 0.0)
+    
+    def modify_relationship(self, npc_name: str, delta: float) -> None:
+        """Modify relationship score."""
+        current = self.relationships.get(npc_name.lower(), 0.0)
+        self.relationships[npc_name.lower()] = max(-1.0, min(1.0, current + delta))
+    
+    def get_recent_conversations(self):
+        """Get recent conversations."""
+        return []
+    
+    def add_conversation_record(self, npc_name: str, topic: str, outcome: str) -> None:
+        """Record conversation."""
+        pass
+    
+    def can_talk_to(self, npc_name: str) -> bool:
+        """Check if can talk to NPC."""
+        entity = self.game_state.entity_map.get(npc_name.lower())
+        return entity is not None and not entity.is_hostile
+
+
+class MockStateContext:
+    """Mock state context implementation."""
+    
+    def __init__(self, game_state: GameState):
+        self.game_state = game_state
+        self.player_state = "idle"
+        self.readied_action = None
+        self.current_activity = None
+    
+    def get_player_state(self):
+        """Get current player state."""
+        return self.player_state
+    
+    def set_player_state(self, new_state) -> None:
+        """Set new player state."""
+        self.player_state = new_state
+    
+    def can_transition_to(self, new_state) -> bool:
+        """Check if transition is valid."""
+        return True
+    
+    def get_readied_action(self):
+        """Get readied action."""
+        return self.readied_action
+    
+    def set_readied_action(self, readied) -> None:
+        """Set readied action."""
+        self.readied_action = readied
+    
+    def clear_readied_action(self) -> None:
+        """Clear readied action."""
+        self.readied_action = None
+    
+    def start_activity(self, activity_name: str, duration_turns: int) -> None:
+        """Start activity."""
+        self.current_activity = (activity_name, duration_turns)
+    
+    def get_current_activity(self):
+        """Get current activity."""
+        return self.current_activity
+
+
+class MockEnvironmentContext:
+    """Mock environment context implementation."""
+    
+    def get_time_of_day(self) -> str:
+        """Get time of day."""
+        return "afternoon"
+    
+    def get_weather(self) -> str:
+        """Get weather."""
+        return "clear"
+    
+    def get_light_level(self) -> float:
+        """Get light level."""
+        return 1.0
+    
+    def has_environmental_effect(self, effect_name: str) -> bool:
+        """Check environmental effect."""
+        return False
+
+
+class MockBuffContext:
+    """Mock buff context implementation."""
+    
+    def __init__(self):
+        self.active_buffs = []
+        self.buff_effects = {}  # buff_name -> effects dict
+    
+    def add_buff(self, buff_name: str, duration_turns: int, effects: Dict[str, float]) -> None:
+        """Add a temporary buff to the player."""
+        self.active_buffs.append(buff_name)
+        self.buff_effects[buff_name] = effects
+    
+    def apply_buff(self, buff_name: str, duration_turns: int) -> None:
+        """Apply buff (legacy compatibility)."""
+        self.add_buff(buff_name, duration_turns, {})
+    
+    def remove_buff(self, buff_name: str) -> None:
+        """Remove a specific buff."""
+        if buff_name in self.active_buffs:
+            self.active_buffs.remove(buff_name)
+            self.buff_effects.pop(buff_name, None)
+    
+    def get_buff_effect(self, effect_name: str) -> float:
+        """Get total effect value from all active buffs."""
+        total = 0.0
+        for buff_name, effects in self.buff_effects.items():
+            total += effects.get(effect_name, 0.0)
+        return total
+    
+    def has_buff(self, buff_name: str) -> bool:
+        """Check if has buff."""
+        return buff_name in self.active_buffs
+    
+    def get_active_buffs(self):
+        """Get active buffs."""
+        return self.active_buffs.copy()
+
+
+def create_deterministic_test_sequence(event_bus: EventBus):
+    """
+    Create a deterministic test sequence for pipeline validation.
+    
+    This sequence is designed to create predictable patterns that should
+    emerge as stable motifs and generate meaningful abilities.
+    Uses only valid D&D actions: Attack, Dash, Dodge, Influence, Ready
+    """
+    print(f"\n=== Running Deterministic Test Sequence ===")
+    
+    # Sequence 1: Attack -> Dodge Pattern (combat sequence)
+    print("Sequence 1: Attack-Dodge Combat Pattern")
+    for i in range(4):
+        event_bus.publish('PlayerInput', {'input': 'attack goblin'}, source='DeterministicTest')
+        time.sleep(0.05)
+        event_bus.publish('PlayerInput', {'input': 'dodge'}, source='DeterministicTest')  
+        time.sleep(0.05)
+    
+    # Sequence 2: Dash -> Ready Pattern (tactical movement)
+    print("Sequence 2: Dash-Ready Tactical Pattern")
+    for i in range(4):
+        event_bus.publish('PlayerInput', {'input': 'dash north'}, source='DeterministicTest')
+        time.sleep(0.05)
+        event_bus.publish('PlayerInput', {'input': 'ready attack'}, source='DeterministicTest')
+        time.sleep(0.05)
+    
+    # Sequence 3: Influence -> Attack Pattern (social-combat combination)
+    print("Sequence 3: Influence-Attack Pattern")  
+    for i in range(4):
+        event_bus.publish('PlayerInput', {'input': 'influence guard'}, source='DeterministicTest')
+        time.sleep(0.05)
+        event_bus.publish('PlayerInput', {'input': 'attack orc'}, source='DeterministicTest')
+        time.sleep(0.05)
+    
+    print("Deterministic sequence complete")
 
 
 def create_test_events(event_bus: EventBus, num_events: int = 20):
-    """Create test events to demonstrate the tokenization pipeline."""
+    """Create simple test events focused on successful actions."""
+    # Simplified commands that should work with our mock context
     test_commands = [
-        "attack goblin", "look around", "go north", "rest", "talk to merchant",
-        "dodge", "examine sword", "attack wolf", "heal wounds", "move south",
-        "fight orc", "search area", "speak with guard", "defend", "dash east",
-        "strike troll", "observe surroundings", "travel west", "recover stamina", "influence baker"
+        "attack goblin", "attack orc", "attack troll",  # Combat commands
+        "rest", "heal wounds", "recover stamina",        # Recovery commands  
+        "go north", "go south", "move east",             # Movement commands
+        "talk to guard", "influence guard",              # Social commands
+        "look around", "examine area"                    # Observation commands
     ]
     
-    print(f"\n=== Generating {num_events} test events ===")
+    print(f"\n=== Generating {num_events} focused test events ===")
     
     for i in range(num_events):
-        command = random.choice(test_commands)
+        # Use round-robin instead of random for more predictable patterns
+        command = test_commands[i % len(test_commands)]
         
         # Publish player input event
         event_bus.publish(
@@ -99,80 +375,7 @@ def create_test_events(event_bus: EventBus, num_events: int = 20):
         )
         
         # Small delay to allow event processing
-        time.sleep(0.1)
-        
-        # Simulate some successful outcomes with state changes
-        if random.random() < 0.7:  # 70% success rate
-            if 'attack' in command or 'fight' in command or 'strike' in command:
-                # Simulate damage dealt
-                damage = random.randint(3, 15)
-                is_critical = random.random() < 0.1  # 10% critical rate
-                event_bus.publish(
-                    'DamageDealt',
-                    {
-                        'amount': damage,
-                        'target': command.split()[-1],  # Last word as target
-                        'weapon': 'sword',
-                        'is_critical': is_critical,
-                        'attacker': 'player'
-                    },
-                    source='TestEventGenerator'
-                )
-            
-            elif 'move' in command or 'go' in command or 'travel' in command or 'dash' in command:
-                # Simulate movement
-                directions = ['north', 'south', 'east', 'west']
-                direction = random.choice(directions)
-                event_bus.publish(
-                    'PlayerMoved',
-                    {
-                        'new_location': f'Test Location {direction.title()}',
-                        'previous_location': 'Test Location Center',
-                        'movement_type': command.split()[0]
-                    },
-                    source='TestEventGenerator'
-                )
-            
-            elif 'talk' in command or 'speak' in command or 'influence' in command:
-                # Simulate social interaction
-                outcomes = ['success', 'neutral', 'failure']
-                outcome = random.choice(outcomes)
-                event_bus.publish(
-                    'SocialInteraction',
-                    {
-                        'target': command.split()[-1],
-                        'interaction_type': command.split()[0],
-                        'outcome': outcome,
-                        'relationship_change': random.randint(-2, 3)
-                    },
-                    source='TestEventGenerator'
-                )
-            
-            elif 'rest' in command or 'heal' in command or 'recover' in command:
-                # Simulate recovery
-                health_recovered = random.randint(5, 15)
-                stamina_recovered = random.randint(3, 10)
-                event_bus.publish(
-                    'DefensiveAction',
-                    {
-                        'action_type': command.split()[0],
-                        'health_recovered': health_recovered,
-                        'stamina_recovered': stamina_recovered
-                    },
-                    source='TestEventGenerator'
-                )
-        else:
-            # Simulate failure
-            event_bus.publish(
-                'ActionFailed',
-                {
-                    'verb': command.split()[0],
-                    'raw_input': command,
-                    'failure_reason': 'The action could not be completed.',
-                    'suggestions': ['Try a different approach', 'Check your resources']
-                },
-                source='TestEventGenerator'
-            )
+        time.sleep(0.05)  # Reduced delay for faster testing
 
 
 async def run_event_driven_demo(test_mode: bool = False, num_test_events: int = 20):
@@ -195,6 +398,18 @@ async def run_event_driven_demo(test_mode: bool = False, num_test_events: int = 
     # Initialize game state
     game_state = GameState()
     game_state.initialize_default_entities()
+    
+    # Add test entities for deterministic sequence
+    from shared.data_structures import Entity
+    test_entities = {
+        'goblin': Entity(name='Goblin', is_hostile=True, stats={'health': 50.0, 'aggression': 0.8}),
+        'orc': Entity(name='Orc', is_hostile=True, stats={'health': 80.0, 'aggression': 0.9}), 
+        'guard': Entity(name='Guard', is_hostile=False, stats={'health': 120.0, 'aggression': 0.3})
+    }
+    
+    # Add test entities to current location
+    for key, entity in test_entities.items():
+        game_state.environment.add_entity(key, entity)
     
     # --- 2. EVENT SYSTEM SETUP ---
     event_bus = get_event_bus()
@@ -255,10 +470,10 @@ async def run_event_driven_demo(test_mode: bool = False, num_test_events: int = 
     
     # --- 6. DEMONSTRATION LOOP ---
     if test_mode:
-        print(f"\n=== RUNNING AUTOMATED TEST WITH {num_test_events} EVENTS ===")
+        print(f"\n=== RUNNING DETERMINISTIC TEST ===")
         
-        # Generate test events
-        create_test_events(event_bus, num_test_events)
+        # Generate deterministic test sequence
+        create_deterministic_test_sequence(event_bus)
         
         # Allow time for all events to process
         await asyncio.sleep(2.0)
@@ -266,6 +481,11 @@ async def run_event_driven_demo(test_mode: bool = False, num_test_events: int = 
         # Force process all tokens through the pipeline
         print(f"\n=== PROCESSING TOKENS THROUGH PIPELINE ===")
         token_processor.force_process_all_tokens()
+        
+        # Force motif detection analysis
+        print(f"\n=== FORCING MOTIF DETECTION ===")
+        import time
+        temporal_graph._run_analysis(time.time())
         
         # Allow time for analysis to complete
         await asyncio.sleep(1.0)
