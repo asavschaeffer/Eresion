@@ -1,9 +1,8 @@
-# text_based_RPG/stream_processors/player_processor.py
+# eresion_core/tokenization/processors/player_processor.py
 import time
-from typing import List
+from typing import List, Any, Any
 
 from shared.interfaces import IStreamProcessor, Token, TokenType
-from text_based_rpg.game_logic.state import GameState
 
 class PlayerProcessor(IStreamProcessor):
     """
@@ -11,18 +10,20 @@ class PlayerProcessor(IStreamProcessor):
     
     This processor focuses on core gameplay elements like health, stamina,
     location, and combat state.
+    
+    FIXED: No longer imports concrete GameState - works with generic bridge data.
     """
     
     def get_domain(self) -> str:
         """Return the domain name for tokens produced by this processor."""
         return "player"
         
-    def process(self, game_state: GameState) -> List[Token]:
+    def process(self, bridge_data: Any) -> List[Token]:
         """
         Convert player state into domain-specific tokens.
         
         Args:
-            game_state: Current game state to process
+            bridge_data: Generic player data from game bridge (not concrete GameState)
             
         Returns:
             List of tokens representing player state
@@ -30,77 +31,86 @@ class PlayerProcessor(IStreamProcessor):
         tokens = []
         current_time = time.time()
         
+        # Extract player data from bridge (generic approach)
+        location = getattr(bridge_data, 'location', 'unknown')
+        previous_location = getattr(bridge_data, 'previous_location', None)
+        health_percent = getattr(bridge_data, 'health_percent', 1.0)
+        stamina_percent = getattr(bridge_data, 'stamina_percent', 1.0)
+        in_combat = getattr(bridge_data, 'in_combat', False)
+        action_modifier = getattr(bridge_data, 'action_modifier', None)
+        abilities = getattr(bridge_data, 'abilities', {})
+        
         # Location token
         tokens.append(Token(
             type="LOCATION",
             timestamp_s=current_time,
             metadata={
                 "domain": self.get_domain(),
-                "location": game_state.player.location,
-                "previous_location": game_state.player.previous_location
+                "location": location,
+                "previous_location": previous_location
             }
         ))
         
         # Health state token
-        health_category = self._categorize_health(game_state.player.health_percent)
+        health_category = self._categorize_health(health_percent)
         tokens.append(Token(
             type="PLAYER_STATE",
             timestamp_s=current_time,
             metadata={
                 "domain": self.get_domain(),
                 "state_type": "health",
-                "value": game_state.player.health_percent,
+                "value": health_percent,
                 "category": health_category
             }
         ))
         
         # Stamina state token
-        stamina_category = self._categorize_stamina(game_state.player.stamina_percent)
+        stamina_category = self._categorize_stamina(stamina_percent)
         tokens.append(Token(
             type="PLAYER_STATE",
             timestamp_s=current_time,
             metadata={
                 "domain": self.get_domain(),
                 "state_type": "stamina", 
-                "value": game_state.player.stamina_percent,
+                "value": stamina_percent,
                 "category": stamina_category
             }
         ))
         
         # Combat state token
-        if game_state.player.in_combat:
+        if in_combat:
             tokens.append(Token(
                 type="COMBAT_STATE",
                 timestamp_s=current_time,
                 metadata={
                     "domain": self.get_domain(),
                     "in_combat": True,
-                    "health_percent": game_state.player.health_percent,
-                    "stamina_percent": game_state.player.stamina_percent
+                    "health_percent": health_percent,
+                    "stamina_percent": stamina_percent
                 }
             ))
             
         # Action modifier token (if present)
-        if game_state.player.action_modifier:
+        if action_modifier:
             tokens.append(Token(
                 type="ACTION_MODIFIER",
                 timestamp_s=current_time,
                 metadata={
                     "domain": self.get_domain(),
-                    "modifier": game_state.player.action_modifier
+                    "modifier": action_modifier
                 }
             ))
             
         # Ability state tokens
-        for ability_id, ability in game_state.player.abilities.items():
+        for ability_id, ability in abilities.items():
             tokens.append(Token(
                 type="ABILITY_AVAILABLE",
                 timestamp_s=current_time,
                 metadata={
                     "domain": self.get_domain(),
                     "ability_id": ability_id,
-                    "ability_name": ability.name,
-                    "source_motif": ability.source_motif_id
+                    "ability_name": getattr(ability, 'name', ability_id),
+                    "source_motif": getattr(ability, 'source_motif_id', None)
                 }
             ))
         

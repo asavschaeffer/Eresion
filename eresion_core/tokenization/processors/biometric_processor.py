@@ -1,9 +1,9 @@
 # text_based_RPG/stream_processors/biometric_processor.py
 import time
-from typing import List
+from typing import List, Any
 
 from shared.interfaces import IStreamProcessor, Token, TokenType
-from text_based_rpg.game_logic.state import GameState
+# FIXED: No longer imports concrete GameState
 
 class BiometricProcessor(IStreamProcessor):
     """
@@ -17,7 +17,7 @@ class BiometricProcessor(IStreamProcessor):
         """Return the domain name for tokens produced by this processor."""
         return "biometric"
         
-    def process(self, game_state: GameState) -> List[Token]:
+    def process(self, bridge_data: Any) -> List[Token]:
         """
         Convert biometric state into domain-specific tokens.
         

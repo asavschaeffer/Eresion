@@ -11,7 +11,7 @@ import time
 import random
 import math
 from typing import Dict, Any
-from text_based_rpg.game_logic.state import GameState, BiometricState
+# FIXED: No longer imports concrete GameState - uses generic bridge data
 
 
 class BiometricDataProvider:

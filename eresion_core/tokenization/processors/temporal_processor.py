@@ -1,9 +1,8 @@
-# text_based_RPG/stream_processors/temporal_processor.py
+# eresion_core/tokenization/processors/temporal_processor.py
 import time
-from typing import List
+from typing import List, Any, Any
 
 from shared.interfaces import IStreamProcessor, Token, TokenType
-from text_based_rpg.game_logic.state import GameState
 
 class TemporalProcessor(IStreamProcessor):
     """
@@ -11,18 +10,20 @@ class TemporalProcessor(IStreamProcessor):
     
     This processor handles play session patterns, turn-based timing,
     and temporal behavioral analysis to identify player rhythm patterns.
+    
+    FIXED: No longer imports concrete GameState - works with generic bridge data.
     """
     
     def get_domain(self) -> str:
         """Return the domain name for tokens produced by this processor."""
         return "temporal"
         
-    def process(self, game_state: GameState) -> List[Token]:
+    def process(self, bridge_data: Any) -> List[Token]:
         """
         Convert temporal state into domain-specific tokens.
         
         Args:
-            game_state: Current game state to process
+            bridge_data: Generic temporal data from game bridge (not concrete GameState)
             
         Returns:
             List of tokens representing temporal patterns and session dynamics
@@ -30,8 +31,13 @@ class TemporalProcessor(IStreamProcessor):
         tokens = []
         current_time = time.time()
         
+        # Extract temporal data from bridge (generic approach)
+        session_start_time = getattr(bridge_data, 'session_start_time', current_time)
+        current_turn = getattr(bridge_data, 'turn', 0)
+        actions_this_session = getattr(bridge_data, 'actions_this_session', 0)
+        
         # Session duration token
-        session_duration = current_time - game_state.temporal.session_start_time
+        session_duration = current_time - session_start_time
         session_category = self._categorize_session_duration(session_duration)
         
         tokens.append(Token(
@@ -47,14 +53,14 @@ class TemporalProcessor(IStreamProcessor):
         ))
         
         # Turn progression token
-        turn_pace = self._calculate_turn_pace(game_state)
+        turn_pace = self._calculate_turn_pace(current_turn, session_duration)
         tokens.append(Token(
             type="TEMPORAL_PATTERN",
             timestamp_s=current_time,
             metadata={
                 "domain": self.get_domain(),
                 "pattern_type": "turn_progression",
-                "current_turn": game_state.temporal.turn,
+                "current_turn": current_turn,
                 "pace": turn_pace,
                 "pace_category": self._categorize_turn_pace(turn_pace)
             }
@@ -62,21 +68,21 @@ class TemporalProcessor(IStreamProcessor):
         
         # Action frequency token
         if session_duration > 0:
-            action_rate = game_state.temporal.actions_this_session / (session_duration / 60.0)  # actions per minute
+            action_rate = actions_this_session / (session_duration / 60.0)  # actions per minute
             tokens.append(Token(
                 type="TEMPORAL_PATTERN",
                 timestamp_s=current_time,
                 metadata={
                     "domain": self.get_domain(),
                     "pattern_type": "action_frequency",
-                    "actions_total": game_state.temporal.actions_this_session,
+                    "actions_total": actions_this_session,
                     "rate_per_minute": action_rate,
                     "activity_level": self._categorize_activity_level(action_rate)
                 }
             ))
         
         # Play style rhythm token (derived insight)
-        rhythm_pattern = self._analyze_play_rhythm(game_state, session_duration)
+        rhythm_pattern = self._analyze_play_rhythm(current_turn, actions_this_session, session_duration)
         if rhythm_pattern:
             tokens.append(Token(
                 type="BEHAVIORAL_PATTERN",
@@ -91,7 +97,7 @@ class TemporalProcessor(IStreamProcessor):
             ))
         
         # Session phase token
-        phase = self._determine_session_phase(session_duration, game_state.temporal.actions_this_session)
+        phase = self._determine_session_phase(session_duration, actions_this_session)
         tokens.append(Token(
             type="SESSION_STATE",
             timestamp_s=current_time,
@@ -104,8 +110,8 @@ class TemporalProcessor(IStreamProcessor):
         ))
         
         # Temporal consistency token (for pattern detection)
-        if game_state.temporal.turn > 10:  # Need some history
-            consistency = self._calculate_temporal_consistency(game_state)
+        if current_turn > 10:  # Need some history
+            consistency = self._calculate_temporal_consistency(current_turn, session_duration)
             tokens.append(Token(
                 type="BEHAVIORAL_PATTERN",
                 timestamp_s=current_time,
@@ -136,15 +142,14 @@ class TemporalProcessor(IStreamProcessor):
         else:
             return "extended"
             
-    def _calculate_turn_pace(self, game_state: GameState) -> float:
+    def _calculate_turn_pace(self, current_turn: int, session_duration: float) -> float:
         """
         Calculate the pace of turn progression.
         
         Returns turns per minute as a pace metric.
         """
-        session_duration = time.time() - game_state.temporal.session_start_time
         if session_duration > 0:
-            return game_state.temporal.turn / (session_duration / 60.0)
+            return current_turn / (session_duration / 60.0)
         return 0.0
         
     def _categorize_turn_pace(self, pace: float) -> str:
@@ -173,17 +178,17 @@ class TemporalProcessor(IStreamProcessor):
         else:
             return "frantic"
             
-    def _analyze_play_rhythm(self, game_state: GameState, session_duration: float) -> dict:
+    def _analyze_play_rhythm(self, current_turn: int, actions_this_session: int, session_duration: float) -> dict:
         """
         Analyze the player's temporal rhythm patterns.
         
         This creates emergent behavioral signatures based on timing patterns.
         """
-        if session_duration < 60 or game_state.temporal.turn < 5:
+        if session_duration < 60 or current_turn < 5:
             return None  # Not enough data
             
-        turn_pace = self._calculate_turn_pace(game_state)
-        action_rate = game_state.temporal.actions_this_session / (session_duration / 60.0)
+        turn_pace = self._calculate_turn_pace(current_turn, session_duration)
+        action_rate = actions_this_session / (session_duration / 60.0)
         
         # Classify rhythm patterns
         if turn_pace > 3.0 and action_rate > 3.0:
@@ -241,7 +246,7 @@ class TemporalProcessor(IStreamProcessor):
         }
         return phase_map.get(phase, ["unknown_phase"])
         
-    def _calculate_temporal_consistency(self, game_state: GameState) -> float:
+    def _calculate_temporal_consistency(self, current_turn: int, session_duration: float) -> float:
         """
         Calculate how consistent the player's temporal patterns are.
         
@@ -249,11 +254,10 @@ class TemporalProcessor(IStreamProcessor):
         For now, we use current session metrics as a proxy.
         """
         # Simplified consistency metric based on current session
-        session_duration = time.time() - game_state.temporal.session_start_time
         expected_turns = session_duration / 30.0  # Expect ~1 turn per 30 seconds
         
         if expected_turns > 0:
-            turn_consistency = 1.0 - abs(game_state.temporal.turn - expected_turns) / max(expected_turns, game_state.temporal.turn)
+            turn_consistency = 1.0 - abs(current_turn - expected_turns) / max(expected_turns, current_turn)
             return max(0.0, min(1.0, turn_consistency))
         
         return 0.5  # Neutral consistency for edge cases
