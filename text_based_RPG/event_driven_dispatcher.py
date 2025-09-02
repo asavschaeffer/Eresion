@@ -151,6 +151,28 @@ class EventDrivenDispatcher:
         """
         state_changes = getattr(outcome, 'state_changes', {})
         
+        # Check if this was an ability usage (for recursive feedback loop)
+        tokens = getattr(outcome, 'tokens_generated', [])
+        for token in tokens:
+            if token.metadata.get('is_emergent', False):
+                # This was an ability usage - publish AbilityUsed event
+                self.event_bus.publish(
+                    'AbilityUsed',
+                    {
+                        'ability_id': token.metadata.get('ability_id', 'unknown'),
+                        'ability_name': token.metadata.get('ability_name', verb),
+                        'success': outcome.success,
+                        'effect_strength': token.metadata.get('effect_strength', 0.0),
+                        'resource_cost': token.metadata.get('resource_cost', 0.0),
+                        'usage_count': token.metadata.get('usage_count', 1),
+                        'success_rate': token.metadata.get('success_rate', 1.0 if outcome.success else 0.0),
+                        'recursion_depth': token.metadata.get('recursion_depth', 1),
+                        'source_motif_id': token.metadata.get('source_motif_id', 'unknown')
+                    },
+                    source='EventDrivenDispatcher'
+                )
+                break  # Only publish once per ability usage
+        
         # Combat-related events
         if verb in ['attack', 'fight', 'strike', 'hit']:
             if 'damage_dealt' in state_changes:

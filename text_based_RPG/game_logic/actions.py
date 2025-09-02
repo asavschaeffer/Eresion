@@ -11,7 +11,7 @@ import random
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass
-from shared.interfaces import Token
+from shared.interfaces import Token, AssembledAbility
 from shared.action_interfaces import (
     ActionModifier, ActionTarget, PlayerState, ReadiedAction,
     ICombatContext, IMovementContext, IResourceContext, ISocialContext,
@@ -972,3 +972,187 @@ class RestAction(BaseDnDAction):
     def get_base_social_orientation(self) -> float:
         """Rest is neutral socially."""
         return 0.0
+
+
+class AbilityAction(BaseDnDAction):
+    """Dynamic action for executing crystallized abilities."""
+    
+    def __init__(self, ability: AssembledAbility):
+        super().__init__(ability.name, ability.narrative)
+        self.ability = ability
+        self.usage_count = 0
+        self.success_count = 0
+    
+    def get_required_contexts(self) -> List[str]:
+        """Abilities may need various contexts based on their effects."""
+        # For now, assume abilities need basic contexts
+        return ['combat', 'resources', 'state']
+    
+    def validate_preconditions(self, contexts: Dict[str, Any], 
+                              target: Optional[ActionTarget], 
+                              modifier: Optional[ActionModifier]) -> ActionOutcome:
+        """Validate ability can be executed."""
+        resources = contexts['resources']
+        
+        # Check resource cost
+        if not resources.has_sufficient_stamina(self.ability.resource_cost):
+            return ActionOutcome(
+                success=False,
+                message=f"Not enough stamina to use {self.ability.name} (requires {self.ability.resource_cost:.1f})"
+            )
+        
+        # TODO: Check cooldown when implemented
+        # TODO: Check trigger conditions
+        
+        return ActionOutcome(success=True, message="")
+    
+    def execute_core_logic(self, contexts: Dict[str, Any], 
+                          target: Optional[ActionTarget], 
+                          modifier: Optional[ActionModifier]) -> ActionExecutionResult:
+        """Execute the crystallized ability."""
+        resources = contexts['resources'] 
+        combat = contexts['combat']
+        state = contexts['state']
+        
+        # Consume resources
+        resources.consume_stamina(self.ability.resource_cost)
+        
+        # Track usage
+        self.usage_count += 1
+        
+        # Apply ability effects based on its primitives
+        effects_applied = []
+        total_effect_strength = 0.0
+        
+        for primitive in self.ability.primitives:
+            effect_strength = self._apply_primitive_effect(primitive, contexts, target)
+            effects_applied.append(f"{primitive.id}: {effect_strength:.2f}")
+            total_effect_strength += effect_strength
+        
+        # Determine success based on effect strength and random factor
+        success_threshold = 0.5 - (total_effect_strength * 0.2)  # Higher effects = higher success chance
+        is_success = random.random() > success_threshold
+        
+        if is_success:
+            self.success_count += 1
+        
+        # Create execution context for tokenization
+        execution_context = {
+            "ability_id": self.ability.id,
+            "ability_name": self.ability.name,
+            "source_motif_id": self.ability.source_motif_id,
+            "resource_cost": self.ability.resource_cost,
+            "effects_applied": effects_applied,
+            "total_effect_strength": total_effect_strength,
+            "usage_count": self.usage_count,
+            "success_rate": self.success_count / self.usage_count,
+            "trigger_type": self.ability.trigger.type,
+            "location": "current_location"  # Would get from context in real system
+        }
+        
+        # Create behavioral signature (abilities show sophisticated behavior)
+        behavioral_signature = BehavioralSignature(
+            aggression=self._get_ability_aggression(),
+            efficiency=total_effect_strength / self.ability.resource_cost,  # Effect per resource
+            risk_tolerance=0.3,  # Using abilities is moderate risk
+            social_orientation=self._get_ability_social_orientation(),
+            creativity=0.8,  # Using crystallized abilities shows creativity
+            patience=0.6   # Abilities require strategic thinking
+        )
+        
+        # Create outcome message
+        if is_success:
+            message = f"You successfully activate {self.ability.name}! {self.ability.narrative}"
+            consequences = [f"Effect strength: {total_effect_strength:.2f}"] + effects_applied
+        else:
+            message = f"You attempt to use {self.ability.name} but the effect falters."
+            consequences = ["The ability's power was insufficient this time."]
+        
+        outcome = ActionOutcome(
+            success=is_success,
+            message=message,
+            consequences=consequences,
+            state_changes={
+                "player.stamina_percent": -self.ability.resource_cost / 100.0,  # Normalize to percentage
+            }
+        )
+        
+        return ActionExecutionResult(
+            outcome=outcome,
+            target=target,
+            modifier=modifier,
+            execution_context=execution_context,
+            behavioral_signature=behavioral_signature
+        )
+    
+    def _apply_primitive_effect(self, primitive, contexts, target) -> float:
+        """Apply a primitive's effect and return strength."""
+        # This would contain the actual game mechanics for each primitive type
+        # For now, return a base effect strength modified by the primitive's feature vector
+        base_strength = sum(primitive.feature_vector.values()) / len(primitive.feature_vector)
+        
+        # Add some randomness to simulate real gameplay effects
+        randomness = random.uniform(0.8, 1.2)
+        
+        return base_strength * randomness
+    
+    def _get_ability_aggression(self) -> float:
+        """Get aggression level based on ability primitives."""
+        aggression_sum = 0.0
+        count = 0
+        
+        for primitive in self.ability.primitives:
+            if 'aggression' in primitive.feature_vector:
+                aggression_sum += primitive.feature_vector['aggression']
+                count += 1
+        
+        return (aggression_sum / max(1, count)) * 2 - 1  # Normalize to [-1, 1]
+    
+    def _get_ability_social_orientation(self) -> float:
+        """Get social orientation based on ability primitives."""
+        social_sum = 0.0
+        count = 0
+        
+        for primitive in self.ability.primitives:
+            if 'social' in primitive.feature_vector:
+                social_sum += primitive.feature_vector['social'] 
+                count += 1
+        
+        return (social_sum / max(1, count)) * 2 - 1  # Normalize to [-1, 1]
+    
+    def tokenize(self, execution_result: ActionExecutionResult) -> List[Token]:
+        """Enhanced tokenization for ability usage - generates higher-intensity tokens."""
+        tokens = super().tokenize(execution_result)  # Get base tokens
+        
+        current_time = time.time()
+        
+        # Add ability-specific tokens with enhanced intensity
+        ability_token = Token(
+            type=f"ABILITY_{self.ability.trigger.type}",  # e.g., ABILITY_COMBAT_START
+            timestamp_s=current_time,
+            metadata={
+                "ability_id": self.ability.id,
+                "ability_name": self.ability.name,
+                "source_motif_id": self.ability.source_motif_id,
+                "usage_count": self.usage_count,
+                "success_rate": self.success_count / self.usage_count,
+                "effect_strength": execution_result.execution_context["total_effect_strength"],
+                "resource_efficiency": execution_result.behavioral_signature.efficiency,
+                "intensity": min(1.0, execution_result.execution_context["total_effect_strength"] * 1.5),  # Enhanced intensity
+                "is_emergent": True,  # Mark as emergent behavior
+                "recursion_depth": 1,  # Track how deep in the recursive loop we are
+                "primitive_count": len(self.ability.primitives)
+            }
+        )
+        
+        tokens.append(ability_token)
+        
+        return tokens
+    
+    def get_base_aggression(self) -> float:
+        """Get base aggression from ability primitives."""
+        return self._get_ability_aggression()
+    
+    def get_base_social_orientation(self) -> float:
+        """Get base social orientation from ability primitives."""
+        return self._get_ability_social_orientation()

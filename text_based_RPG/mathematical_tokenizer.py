@@ -133,6 +133,19 @@ class MathematicalTokenizer:
                 'token_generator': self._generate_failure_token,
                 'base_intensity': 0.6,
                 'tags': ['FAILURE', 'OUTCOME']
+            },
+            
+            # Ability usage events (recursive feedback loop)
+            'AbilityRegistered': {
+                'token_generator': self._generate_ability_registered_token,
+                'base_intensity': 0.9,  # High intensity for emergent abilities
+                'tags': ['ABILITY', 'EMERGENT', 'CRYSTALLIZATION']
+            },
+            
+            'AbilityUsed': {
+                'token_generator': self._generate_ability_used_token,
+                'base_intensity': 1.0,  # Maximum intensity for recursive feedback
+                'tags': ['ABILITY', 'USAGE', 'RECURSIVE', 'EMERGENT']
             }
         }
     
@@ -567,3 +580,65 @@ class MathematicalTokenizer:
             'pending_actions': len(self.pending_actions),
             'correlation_window_ms': self.correlation_window_ms
         }
+    
+    def _generate_ability_registered_token(self, event: GameEvent, mapping: Dict[str, Any]) -> Optional[Token]:
+        """Generate high-intensity token for ability registration (recursive feedback)."""
+        ability_name = event.get('ability_name', 'Unknown')
+        trigger_type = event.get('trigger_type', 'UNKNOWN')
+        
+        # Generate enhanced intensity for recursive abilities
+        raw_intensity = mapping['base_intensity'] * 1.2  # 20% boost for emergent abilities
+        intensity = self._sigmoid_normalize(raw_intensity)
+        
+        token = Token(
+            type='ABILITY_EMERGENCE',  # New token type for recursive feedback
+            timestamp_s=time.time(),
+            metadata={
+                'ability_name': ability_name,
+                'trigger_type': trigger_type,
+                'intensity': intensity,
+                'is_emergent': True,
+                'feedback_loop_marker': True,  # Mark for recursive analysis
+                'generation_phase': 'crystallization_complete'
+            }
+        )
+        
+        return token
+    
+    def _generate_ability_used_token(self, event: GameEvent, mapping: Dict[str, Any]) -> Optional[Token]:
+        """Generate maximum intensity token for ability usage (recursive feedback loop)."""
+        ability_name = event.get('ability_name', 'Unknown')
+        ability_id = event.get('ability_id', 'unknown')
+        success = event.get('success', False)
+        effect_strength = event.get('effect_strength', 0.0)
+        recursion_depth = event.get('recursion_depth', 1)
+        
+        # Generate maximum intensity for recursive ability usage
+        raw_intensity = mapping['base_intensity']
+        if success:
+            raw_intensity *= (1.0 + effect_strength)  # Boost for successful abilities
+        raw_intensity *= (1.0 + (recursion_depth - 1) * 0.2)  # Boost for deeper recursion
+        
+        intensity = self._sigmoid_normalize(raw_intensity)
+        
+        token = Token(
+            type='ABILITY_RECURSION',  # Special token type for recursive ability usage
+            timestamp_s=time.time(),
+            metadata={
+                'ability_name': ability_name,
+                'ability_id': ability_id,
+                'success': success,
+                'effect_strength': effect_strength,
+                'recursion_depth': recursion_depth,
+                'usage_count': event.get('usage_count', 1),
+                'success_rate': event.get('success_rate', 1.0 if success else 0.0),
+                'source_motif_id': event.get('source_motif_id', 'unknown'),
+                'intensity': intensity,
+                'is_emergent': True,
+                'is_recursive': True,  # Mark for recursive pattern analysis
+                'feedback_loop_marker': True,
+                'generation_phase': 'ability_usage'
+            }
+        )
+        
+        return token

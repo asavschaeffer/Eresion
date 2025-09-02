@@ -462,7 +462,49 @@ async def run_event_driven_demo(test_mode: bool = False, num_test_events: int = 
     narrator = EventDrivenNarrator(event_bus)
     narrator.set_debug_mode(True)
     
-    print("Event-driven dispatcher and narrator initialized.")
+    # Ability registration handler for recursive loop
+    class AbilityRegistrar:
+        """Handles automatic registration of crystallized abilities."""
+        
+        def __init__(self, event_bus: EventBus, dispatcher: EventDrivenDispatcher):
+            self.event_bus = event_bus
+            self.dispatcher = dispatcher
+            self.registered_abilities = {}
+            
+            # Subscribe to ability generation events
+            self.event_bus.subscribe('AbilityGenerated', self.handle_ability_generated)
+        
+        def handle_ability_generated(self, event):
+            """Register newly generated abilities in the action system."""
+            ability_id = event.data.get('ability_id')
+            ability_name = event.data.get('ability_name')
+            
+            # Get the ability from the crystallizer
+            for ability in ability_crystallizer.get_crystallized_abilities():
+                if ability.id == ability_id:
+                    # Register in action dispatcher  
+                    success = self.dispatcher.dispatcher.registry.register_crystallized_ability(ability)
+                    
+                    if success:
+                        self.registered_abilities[ability_id] = ability
+                        print(f"[AbilityRegistrar] Registered ability: {ability_name}")
+                        
+                        # Publish registration event
+                        self.event_bus.publish(
+                            'AbilityRegistered',
+                            {
+                                'ability_id': ability_id,
+                                'ability_name': ability_name,
+                                'action_keywords': ability_name.lower().split(),
+                                'trigger_type': ability.trigger.type
+                            },
+                            source='AbilityRegistrar'
+                        )
+                    break
+    
+    ability_registrar = AbilityRegistrar(event_bus, dispatcher)
+    
+    print("Event-driven dispatcher, narrator, and ability registrar initialized.")
     
     # --- 5. UI COMPONENTS ---
     hud = StatusHUD()

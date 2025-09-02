@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Set, Tuple, Any
 from dataclasses import dataclass
 from text_based_rpg.game_logic.actions import (
     BaseDnDAction, AttackAction, DashAction, DodgeAction, 
-    InfluenceAction, ReadyAction, RestAction
+    InfluenceAction, ReadyAction, RestAction, AbilityAction
 )
 from shared.action_interfaces import (
     ActionModifier, ActionTarget, ModifierRegistry, TargetResolver,
@@ -165,6 +165,62 @@ class DnDActionRegistry:
                 suggestions.append(alias)
         
         return sorted(suggestions)
+    
+    def register_crystallized_ability(self, ability):
+        """Register a crystallized ability as an executable action."""
+        from shared.interfaces import AssembledAbility
+        
+        if not isinstance(ability, AssembledAbility):
+            return False
+        
+        # Create ability action
+        ability_action = AbilityAction(ability)
+        
+        # Register with sanitized name
+        sanitized_name = ability.name.lower().replace(" ", "_").replace("'", "")
+        self.register_action(ability_action)
+        
+        # Add synonyms for the ability name (split on spaces and special chars)
+        ability_words = ability.name.lower().replace("'", "").split()
+        ability_synonyms = set()
+        
+        # Add full name variations
+        ability_synonyms.add(ability.name.lower())
+        ability_synonyms.add(sanitized_name)
+        
+        # Add individual significant words (longer than 2 chars)
+        for word in ability_words:
+            if len(word) > 2 and word not in ['the', 'and', 'of']:
+                ability_synonyms.add(word)
+        
+        # Add ability-specific keywords based on trigger type
+        trigger_type = ability.trigger.type.lower()
+        if 'combat' in trigger_type:
+            ability_synonyms.update(['combat_ability', 'battle_skill'])
+        elif 'social' in trigger_type:
+            ability_synonyms.update(['social_ability', 'influence_skill'])
+        elif 'movement' in trigger_type:
+            ability_synonyms.update(['movement_ability', 'mobility_skill'])
+        
+        self.add_synonyms(sanitized_name, ability_synonyms)
+        
+        return True
+    
+    def unregister_ability(self, ability_name: str):
+        """Remove a crystallized ability from the registry."""
+        sanitized_name = ability_name.lower().replace(" ", "_").replace("'", "")
+        
+        if sanitized_name in self.actions:
+            del self.actions[sanitized_name]
+        
+        # Remove from aliases
+        aliases_to_remove = [alias for alias, target in self.aliases.items() if target == sanitized_name]
+        for alias in aliases_to_remove:
+            del self.aliases[alias]
+        
+        # Remove from synonyms
+        if sanitized_name in self.synonyms:
+            del self.synonyms[sanitized_name]
 
 class EnhancedInputParser:
     """
