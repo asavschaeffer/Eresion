@@ -213,6 +213,61 @@ class AbilityCrystallizer:
                 essence_requirements={'recovery': 0.5, 'tactical': 0.4}
             ),
             
+            # Attack-Defend Combat Patterns
+            AbilityTemplate(
+                name_pattern="Battlefield Tactician",
+                description_pattern="Your attack-defense patterns grant tactical superiority in combat sequences.",
+                trigger_type="COMBAT_START",
+                effect_type="TACTICAL_ADVANTAGE",
+                modifier_type="STRATEGIC", 
+                base_power_cost=25.0,
+                essence_requirements={'aggression': 0.4, 'tactical': 0.7}
+            ),
+            
+            # Movement-Observation Explorer Patterns
+            AbilityTemplate(
+                name_pattern="Scout's Intuition",
+                description_pattern="Your movement and observation patterns manifest as enhanced environmental awareness.", 
+                trigger_type="MOVEMENT_ACTION",
+                effect_type="AWARENESS_BOOST", 
+                modifier_type="PERCEPTIVE",
+                base_power_cost=18.0,
+                essence_requirements={'exploration': 0.6, 'tactical': 0.3}
+            ),
+            
+            # Social-Combat Diplomatic Patterns
+            AbilityTemplate(
+                name_pattern="Diplomatic Warrior",
+                description_pattern="Your pattern of negotiation followed by combat creates unique conflict resolution abilities.",
+                trigger_type="SOCIAL_INTERACTION", 
+                effect_type="INFLUENCE_THEN_FORCE",
+                modifier_type="PERSUASIVE",
+                base_power_cost=22.0,
+                essence_requirements={'social': 0.5, 'tactical': 0.6, 'aggression': 0.3}
+            ),
+            
+            # Sustained Defense Patterns
+            AbilityTemplate(
+                name_pattern="Fortress Mind",
+                description_pattern="Your defensive patterns create an unbreakable mental and physical fortification.",
+                trigger_type="UNDER_ATTACK",
+                effect_type="DEFENSIVE_MASTERY", 
+                modifier_type="RESILIENT",
+                base_power_cost=20.0,
+                essence_requirements={'tactical': 0.8, 'consistency': 0.6}
+            ),
+            
+            # Aggressive Assault Patterns
+            AbilityTemplate(
+                name_pattern="Relentless Assault",
+                description_pattern="Your repeated attack patterns manifest as devastating offensive sequences.",
+                trigger_type="FIRST_ATTACK",
+                effect_type="COMBO_STRIKES",
+                modifier_type="AGGRESSIVE", 
+                base_power_cost=28.0,
+                essence_requirements={'aggression': 0.8, 'intensity': 0.7}
+            ),
+            
             # Hybrid abilities
             AbilityTemplate(
                 name_pattern="Adaptive {aspect}",
@@ -314,8 +369,11 @@ class AbilityCrystallizer:
         self.essence_cache[motif.id] = essence
         
         if self.debug:
-            print(f"[AbilityCrystallizer] Extracted essence: {essence.get_dominant_aspect()} "
+            print(f"[AbilityCrystallizer] Extracted essence from motif {motif.sequence}: {essence.get_dominant_aspect()} "
                   f"(intensity: {essence.intensity:.3f})")
+            print(f"[AbilityCrystallizer] Essence details: aggression={essence.aggression:.2f}, "
+                  f"exploration={essence.exploration:.2f}, social={essence.social:.2f}, "
+                  f"recovery={essence.recovery:.2f}, tactical={essence.tactical:.2f})")
         
         # Step 2: Find matching templates
         matching_templates = self.find_matching_templates(essence)
@@ -411,20 +469,50 @@ class AbilityCrystallizer:
             return analysis
         
         for token_type in sequence:
-            # Map token types to behavioral dimensions
-            if 'ATTACK' in token_type or 'DAMAGE' in token_type:
+            # Enhanced mapping for actual token types from our system
+            token_upper = token_type.upper()
+            
+            # Combat/Aggression patterns
+            if 'ACTION_ATTACK' in token_upper or 'OUTCOME_DAMAGE' in token_upper:
+                analysis['aggression'] += 0.9
+            elif 'ACTION_DEFEND' in token_upper or 'ACTION_DODGE' in token_upper:
+                analysis['tactical'] += 0.8
+                analysis['aggression'] += 0.3  # Defensive combat is still combat-related
+            
+            # Exploration/Movement patterns  
+            elif 'ACTION_MOVE' in token_upper or 'OUTCOME_MOVEMENT' in token_upper:
+                analysis['exploration'] += 0.6
+                analysis['tactical'] += 0.4  # Movement requires tactical thinking
+            elif 'ACTION_OBSERVE' in token_upper or 'OUTCOME_DISCOVERY' in token_upper:
+                analysis['exploration'] += 0.8
+            
+            # Social patterns
+            elif 'ACTION_INTERACT' in token_upper or 'OUTCOME_SOCIAL' in token_upper:
+                analysis['social'] += 0.9
+            
+            # Recovery patterns
+            elif 'ACTION_REST' in token_upper or 'OUTCOME_RECOVERY' in token_upper:
+                analysis['recovery'] += 0.9
+            
+            # Fallback mappings for legacy patterns
+            elif 'ATTACK' in token_upper or 'DAMAGE' in token_upper:
                 analysis['aggression'] += 0.8
-            elif 'OBSERVE' in token_type or 'DISCOVERY' in token_type:
+            elif 'OBSERVE' in token_upper or 'DISCOVERY' in token_upper:
                 analysis['exploration'] += 0.7
-            elif 'SOCIAL' in token_type or 'INTERACT' in token_type:
+            elif 'SOCIAL' in token_upper or 'INTERACT' in token_upper:
                 analysis['social'] += 0.8
-            elif 'RECOVERY' in token_type or 'REST' in token_type:
+            elif 'RECOVERY' in token_upper or 'REST' in token_upper:
                 analysis['recovery'] += 0.8
-            elif 'DEFEND' in token_type or 'DODGE' in token_type:
+            elif 'DEFEND' in token_upper or 'DODGE' in token_upper:
                 analysis['tactical'] += 0.6
-            elif 'MOVE' in token_type:
+            elif 'MOVE' in token_upper:
                 analysis['exploration'] += 0.4
                 analysis['tactical'] += 0.3
+        
+        # Add sequence pattern analysis for more sophisticated detection
+        sequence_patterns = self._detect_sequence_patterns(sequence)
+        for pattern, weight in sequence_patterns.items():
+            analysis[pattern] += weight
         
         # Normalize by sequence length
         seq_length = len(sequence)
@@ -432,6 +520,54 @@ class AbilityCrystallizer:
             analysis[key] /= seq_length
         
         return analysis
+    
+    def _detect_sequence_patterns(self, sequence: Tuple[str, ...]) -> Dict[str, float]:
+        """Detect specific behavioral patterns from token sequences."""
+        patterns = {
+            'aggression': 0.0,
+            'exploration': 0.0,
+            'social': 0.0, 
+            'recovery': 0.0,
+            'tactical': 0.0
+        }
+        
+        if len(sequence) < 2:
+            return patterns
+        
+        # Convert to uppercase for pattern matching
+        seq = [token.upper() for token in sequence]
+        
+        # Detect specific behavioral sequences
+        for i in range(len(seq) - 1):
+            current = seq[i]
+            next_token = seq[i + 1]
+            
+            # Combat patterns
+            if 'ACTION_ATTACK' in current and 'ACTION_DEFEND' in next_token:
+                patterns['tactical'] += 0.5  # Attack-Defense shows tactical thinking
+                patterns['aggression'] += 0.3
+            elif 'ACTION_ATTACK' in current and 'ACTION_ATTACK' in next_token:
+                patterns['aggression'] += 0.7  # Repeated attacks = aggressive
+            
+            # Movement-Observation patterns (scout behavior)
+            elif 'ACTION_MOVE' in current and 'ACTION_OBSERVE' in next_token:
+                patterns['exploration'] += 0.8  # Classic exploration pattern
+                patterns['tactical'] += 0.2
+            
+            # Social-Combat patterns (diplomacy-then-force)
+            elif 'ACTION_INTERACT' in current and 'ACTION_ATTACK' in next_token:
+                patterns['social'] += 0.4
+                patterns['tactical'] += 0.6  # Talking first = tactical
+            
+            # Defensive patterns
+            elif 'ACTION_DEFEND' in current and 'ACTION_DEFEND' in next_token:
+                patterns['tactical'] += 0.9  # Sustained defense = highly tactical
+            
+            # Recovery patterns
+            elif 'ACTION_ATTACK' in current and 'OUTCOME_RECOVERY' in next_token:
+                patterns['recovery'] += 0.5  # Post-combat recovery
+            
+        return patterns
     
     def _analyze_features(self, feature_vector: Dict[str, float]) -> Dict[str, float]:
         """Analyze graph feature vector to extract additional behavioral signals."""

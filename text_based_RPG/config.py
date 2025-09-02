@@ -31,7 +31,7 @@ class PipelineConfig:
     })
     
     # Power budget for ability crystallization
-    ABILITY_POWER_BUDGET: float = 50.0  # Maximum power cost for generated abilities
+    ABILITY_POWER_BUDGET: float = 60.0  # Maximum power cost for generated abilities (increased for enhanced abilities)
     POWER_SCALE_FACTOR: float = 10.0   # Scaling factor for essence to power conversion
 
 @dataclass
